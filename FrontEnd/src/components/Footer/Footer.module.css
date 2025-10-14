@@ -1,0 +1,110 @@
+/* Base Footer Styles */
+.evangadi-footer {
+  background-color: #3a4459;
+  color: #fff;
+  padding: 40px 20px;
+}
+
+/* Container to center content and manage layout */
+.footer-container {
+  width: 90vw;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin: 0 auto;
+}
+
+/* Logo Styling */
+.footer-logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 15px;
+}
+
+/* Styles for each column */
+.footer-column {
+  flex: 1 1 30%;
+}
+
+/* Column Headings */
+.footer-heading {
+  font-size: 1.25rem;
+  margin: 0 auto 15px auto;
+  font-weight: 600;
+}
+
+/* Links Styling */
+.footer-link {
+  text-decoration: none;
+  display: block;
+  margin: 10px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #ffea;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #ff6600;
+}
+
+/* Contact Column */
+.contact {
+  text-align: center; /* Center all items in this column */
+}
+
+.contact-item,
+.contact-item a {
+  color: #ffea; /* semi-transparent white */
+  display: block;
+  margin: 10px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: color 0.3s ease; /* smooth hover */
+}
+
+/* Hover effect for links in contact column */
+.contact-item a:hover {
+  color: #ff6600; /* hover color */
+}
+
+/* Social Icons Styling */
+.social-icons a {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  margin-right: 15px;
+  font-size: 1.2rem;
+  border: 1px solid white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: background-color 0.5s, color 0.3s ease;
+}
+
+.social-icons a:hover {
+  background-color: #ff6600;
+  color: #fff;
+}
+
+/* ---------------------------------- */
+/* RESPONSIVENESS (Mobile/Tablet) */
+/* ---------------------------------- */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* Center all columns */
+  }
+
+  .footer-logo {
+    width: 110px;
+  }
+
+  .footer-column {
+    margin-bottom: 20px;
+  }
+}

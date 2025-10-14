@@ -1,0 +1,62 @@
+.home_container {
+  display: flex;
+  flex-direction: column;
+  max-width: 80vw;
+  margin: 50px auto;
+  gap: 20px;
+}
+
+.ask_welcome_holder {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start; /* removed space-between since arrow is gone */
+  align-items: center;
+  gap: 20px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.ask_question {
+  width: 400px;
+}
+
+.ask_btn {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 10px;
+  border: 2px solid var(--blue-main);
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+  color: var(--blue-main);
+  background-color: white;
+}
+
+.welcome_msg {
+  font-size: 20px;
+}
+
+hr {
+  width: 100%;
+  margin: auto;
+}
+
+@media screen and (max-width: 568px) {
+  .home_container {
+    max-width: 90vw;
+  }
+
+  .ask_welcome_holder {
+    flex-direction: column;
+  }
+
+  .ask_question {
+    width: 100%;
+  }
+}

@@ -1,0 +1,97 @@
+.formcontainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 20px 30px;
+  border-radius: 10px;
+  background-color: white;
+  min-height: 500px !important;
+  max-width: 500px !important;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+              rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+}
+
+.innerContainer {
+  width: 100%;
+}
+
+h2 {
+  margin: 20px 0;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+p {
+  margin-bottom: 20px;
+  margin-top: 5px;
+  font-size: 16px;
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 10px 15px;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline: none;
+  border: 1.5px solid var(--primary-shade);
+}
+
+.submitbtn {
+  padding: 0.75rem;
+  background-color: var(--blue-shade);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.submitbtn:hover {
+  background-color: var(--blue-main);
+}
+
+.success {
+  color: green;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.backButton {
+  margin-bottom: 15px;
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+  .formcontainer {
+    width: 95% !important;
+  }
+  .innerContainer {
+    width: 90%;
+    text-align: center;
+    border: none;
+  }
+  h2 {
+    margin: 10px;
+    color: black;
+  }
+}
