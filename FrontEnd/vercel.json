@@ -9,10 +9,6 @@
       }
     }
   ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -23,5 +19,8 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
