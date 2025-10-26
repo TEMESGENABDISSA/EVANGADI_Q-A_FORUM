@@ -1,4 +1,4 @@
-import Classes from "./footer.module.css";
+import Classes from "./Footer.module.css";
 import { Link } from "react-router-dom";
 import Layout from "../../Layout/Layout.jsx";
 
