@@ -1,7 +1,8 @@
-import Header from "../components/Header/Header.jsx";
-import Footer from "../components/Footer/Footer.jsx";
-import Chatbot from "../components/Chatbot/Chatbot.jsx";
-import { useTheme } from "../context/ThemeContext";
+import Header from "./../components/Header/Header.jsx";
+import Footer from "./../components/Footer/Footer.jsx";
+// Temporarily comment out Chatbot import to test build
+// import Chatbot from "./../components/Chatbot/Chatbot.jsx";
+import { useTheme } from "./../context/ThemeContext";
 import classes from "./Layout.module.css";
 
 function Layout({ children }) {
@@ -16,7 +17,7 @@ function Layout({ children }) {
       <Header />
       <div className={classes.content}>{children}</div>
       <Footer />
-      <Chatbot />
+      {/* Temporarily removed Chatbot component */}
     </div>
   );
 }
