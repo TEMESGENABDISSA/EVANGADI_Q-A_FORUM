@@ -9,6 +9,12 @@ const dbConnection = mysql2.createPool({
   connectionLimit:
     process.env.CONNECTION_LIMIT || process.env.DB_CONNECTION_LIMIT,
   host: process.env.DB_HOST,
+  charset: "utf8mb4_general_ci",
 });
 
-module.exports = dbConnection.promise();
+const pool = dbConnection.promise();
+
+// Ensure connection/session uses utf8mb4 for emoji support
+pool.query("SET NAMES utf8mb4").catch(() => {});
+
+module.exports = pool;

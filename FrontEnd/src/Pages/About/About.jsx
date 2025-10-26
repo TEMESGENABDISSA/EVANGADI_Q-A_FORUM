@@ -17,7 +17,7 @@ const About = () => {
         to meet mentors of your own, please start by joining the network here.
       </p>
       <button className={styles.how_it_works_btn}>
-        <Link to="/" style={{color:"white" ,textDecoration:"none"}}>HOW IT WORKS</Link></button>
+        <Link to="/how-it-works" style={{color:"white" ,textDecoration:"none"}}>HOW IT WORKS</Link></button>
       {/* <div className={styles.design_shape}></div> */}
     </div>
     </section>

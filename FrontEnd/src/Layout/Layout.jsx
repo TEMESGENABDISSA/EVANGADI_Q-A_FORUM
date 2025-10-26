@@ -1,16 +1,24 @@
-import Header from '../components/Header/Header.jsx'
-import Footer from '../components/Footer/Footer.jsx'
+import Header from "../components/Header/Header.jsx";
+import Footer from "../components/Footer/Footer.jsx";
+import Chatbot from "../components/Chatbot/Chatbot";
+import { useTheme } from "../context/ThemeContext";
+import classes from "./Layout.module.css";
 
-function Layout({children}) {
+function Layout({ children }) {
+  const { isDarkMode } = useTheme();
+
   return (
-    <div>
-      <Header/>
-      <div style={{minHeight:"100vh !important"}}>
-      {children}
-      </div>
-      <Footer/>
+    <div
+      className={`${classes.layout} ${
+        isDarkMode ? classes.dark : classes.light
+      }`}
+    >
+      <Header />
+      <div className={classes.content}>{children}</div>
+      <Footer />
+      <Chatbot />
     </div>
-  )
+  );
 }
 
-export default Layout
+export default Layout;

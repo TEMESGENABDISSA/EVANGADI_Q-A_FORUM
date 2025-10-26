@@ -1,0 +1,449 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1;
+  padding: 2rem 1rem;
+  transition: all 0.3s ease;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.light {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+dark {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.hero {
+  text-align: center;
+  padding: 3rem 1rem;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0 auto 2rem;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.stepsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto 4rem;
+  padding: 0 1rem;
+}
+
+.stepCard {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.stepCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.stepCard:hover::before {
+  transform: scaleX(1);
+}
+
+.darkCard {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.stepCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color);
+}
+
+.stepIcon {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.stepCard:hover .stepIcon {
+  transform: scale(1.1);
+}
+
+.stepCard h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+}
+
+.stepCard h3::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.stepCard:hover h3::after {
+  width: 100%;
+}
+
+.stepCard p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+/* Bottom row layout */
+.bottomRow {
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto 4rem;
+  padding: 0 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.engageCard {
+  flex: 1;
+  min-width: 280px;
+  max-width: 400px;
+  margin: 0;
+}
+
+.ctaSection {
+  flex: 1;
+  text-align: center;
+  padding: 2rem;
+  border-radius: 8px;
+  background: var(--bg-primary);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 280px;
+  max-width: 400px;
+  margin: 0;
+  height: 100%;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ctaSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.ctaSection:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color);
+}
+
+.ctaSection:hover::before {
+  transform: scaleX(1);
+}
+
+/* Dark mode text colors for ctaSection */
+.darkCard.ctaSection h2,
+.darkCard.ctaSection p {
+  color: var(--text-primary) !important;
+}
+
+.darkCard.ctaSection {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+@media (max-width: 768px) {
+  .bottomRow {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .engageCard,
+  .ctaSection {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+.darkCta {
+  background: var(--bg-secondary);
+}
+
+.ctaSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+}
+
+.ctaSection h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  position: relative;
+  display: inline-block;
+  font-weight: 700;
+}
+
+.ctaSection h2::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: var(--primary-color);
+}
+
+.ctaSection p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0 auto 2rem;
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+  color: white !important;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ctaButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #4f46e5);
+  transition: width 0.3s ease;
+  z-index: -1;
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+  color: white;
+  text-decoration: none;
+}
+
+.ctaButton:hover::before {
+  width: 100%;
+}
+
+.ctaSection {
+  text-align: center;
+  padding: 4rem 2rem;
+  margin: 2rem auto;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  max-width: 800px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(203, 213, 224, 0.4);
+}
+
+dark .ctaSection {
+  background: rgba(26, 32, 44, 0.7);
+  border: 1px solid rgba(74, 85, 104, 0.3);
+}
+
+.ctaSection h2 {
+  font-size: 2.25rem;
+  margin: 0 0 1rem;
+  color: #2d3748;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+dark .ctaSection h2 {
+  color: #f7fafc;
+}
+
+.ctaSection p {
+  font-size: 1.125rem;
+  color: #4a5568;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  line-height: 1.7;
+}
+
+dark .ctaSection p {
+  color: #cbd5e0;
+}
+
+.ctaButton {
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+  color: white;
+  border: none;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ctaButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #4f46e5);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ctaButton:hover::before {
+  opacity: 1;
+}
+
+.ctaButton:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+  .stepsContainer {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 2rem 1rem;
+  }
+  
+  .hero {
+    padding: 1.5rem 0.5rem 3rem;
+  }
+  
+  .hero h1 {
+    font-size: 2.25rem;
+  }
+  
+  .hero .subtitle {
+    font-size: 1.125rem;
+  }
+  
+  .stepsContainer {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin-bottom: 4rem;
+  }
+  
+  .stepCard {
+    padding: 2rem 1.5rem;
+  }
+  
+  .ctaSection {
+    padding: 3rem 1.5rem;
+    margin: 1rem auto 3rem;
+  }
+  
+  .ctaSection h2 {
+    font-size: 1.75rem;
+  }
+  
+  .ctaSection p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .stepCard h3 {
+    font-size: 1.35rem;
+  }
+  
+  .ctaSection {
+    padding: 2.5rem 1.25rem;
+  }
+}

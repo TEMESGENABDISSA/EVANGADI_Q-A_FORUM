@@ -1,37 +1,41 @@
 import { useContext } from "react";
 import classes from "./header.module.css";
 import EvangadiLogo from "../../Assets/Images/evangadi-logo-header.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Navbar, Nav, Button, Container } from "react-bootstrap";
 import { UserState } from "../../App.jsx";
+import ThemeToggle from "../ThemeToggle/ThemeToggle";
+import NotificationBell from "../NotificationBell/NotificationBell";
+import { useTheme } from "../../context/ThemeContext";
 
 function Header() {
-  const { user } = useContext(UserState);
+  const { user, setUser } = useContext(UserState);
   const userId = user?.userid;
+  const { isDarkMode } = useTheme();
+  const navigate = useNavigate();
+
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    navigate('/home');
+  };
 
   const handleSignOut = () => {
-    localStorage.removeItem("Evangadi_Forum"); // remove auth token
-    window.location.replace("/auth"); // redirect to login
+    localStorage.removeItem("Evangadi_Forum");
+    setUser(null);
+    navigate('/auth');
   };
 
   return (
     <>
       <Navbar
-        bg="light"
-        variant="light"
         expand="md"
-        className="px-3"
-        style={{
-          position: "sticky",
-          top: "0",
-          zIndex: "3",
-          backgroundColor: "white",
-          borderBottom: "1px solid #dee2e6",
-        }}
+        className={`px-3 ${classes.navbar} ${
+          isDarkMode ? classes.dark : classes.light
+        }`}
       >
         <Container className={classes.header_container}>
-          <Navbar.Brand href="/">
+          <Navbar.Brand as="div" style={{ cursor: 'pointer' }} onClick={handleLogoClick}>
             <img
               src={EvangadiLogo}
               className="d-inline-block align-top"
@@ -51,18 +55,42 @@ function Header() {
           >
             <Nav className="flex-column flex-md-row w-100 justify-content-end nav-links-holder">
               {/* ✅ Always display Home */}
-              <Nav.Link as={Link} to="/" className={classes.navigation_links}>
+              <Nav.Link
+                as={Link}
+                to="/home"
+                className={classes.navigation_links}
+              >
                 Home
               </Nav.Link>
 
-              <Nav.Link as={Link} to="/" className={classes.navigation_links}>
+              <Nav.Link as={Link} to="/how-it-works" className={classes.navigation_links}>
                 How it Works
               </Nav.Link>
 
+              {/* Theme Toggle */}
+              <div className={classes.themeToggleContainer}>
+                <ThemeToggle />
+              </div>
+
+              {/* Notification Bell - only show for logged in users */}
+              {userId && (
+                <div className={classes.notificationContainer}>
+                  <NotificationBell />
+                </div>
+              )}
+
               {userId ? (
-                <Button onClick={handleSignOut} className={classes.logout_btn}>
-                  Logout
-                </Button>
+                <div className={classes.userSection}>
+                  <span className={classes.userName}>
+                    Welcome, {user?.username}
+                  </span>
+                  <Button
+                    onClick={handleSignOut}
+                    className={classes.logout_btn}
+                  >
+                    Logout
+                  </Button>
+                </div>
               ) : (
                 <Nav.Link
                   as={Link}

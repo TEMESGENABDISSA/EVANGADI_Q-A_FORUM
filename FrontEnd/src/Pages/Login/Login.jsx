@@ -26,7 +26,7 @@ function Login({ onSwitch }) {
       const response = await axiosInstance.post("/user/login", formData);
 
       localStorage.setItem("Evangadi_Forum", response.data.token);
-      window.location.href = "/";
+      window.location.href = "/home";
 
       setSuccess("Login successful! Redirecting...");
       setError(null);
@@ -70,13 +70,17 @@ function Login({ onSwitch }) {
           {success && <p className={classes.success}>{success}</p>}
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <input
             type="text"
             name="usernameOrEmail"
             placeholder="Username or Email"
             value={formData.usernameOrEmail}
             onChange={handleChange}
+            autoComplete="username"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
             required
           />
           <div className={classes.passwordinput}>
@@ -86,6 +90,10 @@ function Login({ onSwitch }) {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
+              autoComplete="new-password"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
               required
             />
             <button type="button" onClick={handleTogglePassword}>

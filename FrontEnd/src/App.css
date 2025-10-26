@@ -6,16 +6,39 @@
   --blue-main: #516cf0;
   --blue-shade: #7186ef;
 
-
   --header-font: "montserrat";
   --body-text-font: "Poppins";
-  --decorative-text:"dancing script"
+  --decorative-text: "dancing script";
+
+  /* Light theme (default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --border-color: #dee2e6;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --hover-bg: #f5f5f5;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3a3a3a;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-muted: #888888;
+  --border-color: #404040;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --hover-bg: #404040;
 }
 * {
   padding: 0;
   margin: 0;
   font-family: sans-serif !important;
-  font-family: var(--body-text-font),sans-serif !important;
+  font-family: var(--body-text-font), sans-serif !important;
   box-sizing: border-box;
 }
 
@@ -25,6 +48,184 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--header-font) ,sans-serif !important;
-  
+  font-family: var(--header-font), sans-serif !important;
+}
+
+/* Global dark mode styles */
+[data-theme="dark"] {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .container,
+[data-theme="dark"] .mainContainer {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .card {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control:focus {
+  background-color: var(--bg-secondary);
+  border-color: var(--blue-main);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 0.2rem rgba(81, 108, 240, 0.25);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .container {
+    max-width: 100%;
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+
+  .card {
+    margin-bottom: 15px;
+  }
+
+  .form-control {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Improve touch targets */
+  button,
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Stack elements vertically on mobile */
+  .row {
+    margin: 0;
+  }
+
+  .col-md-6,
+  .col-lg-4,
+  .col-lg-6,
+  .col-lg-8 {
+    padding: 0 0 15px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  .card {
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+
+  .card-body {
+    padding: 15px;
+  }
+
+  /* Make text more readable on small screens */
+  h1 {
+    font-size: 1.8rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
+  h3 {
+    font-size: 1.3rem;
+  }
+  h4 {
+    font-size: 1.1rem;
+  }
+  h5 {
+    font-size: 1rem;
+  }
+  h6 {
+    font-size: 0.9rem;
+  }
+
+  /* Improve form inputs on mobile */
+  .form-control {
+    padding: 12px;
+    border-radius: 6px;
+  }
+
+  /* Better spacing for mobile */
+  .mb-3 {
+    margin-bottom: 1rem !important;
+  }
+  .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+  .mb-5 {
+    margin-bottom: 2rem !important;
+  }
+}
+
+/* Tablet specific styles */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .container {
+    max-width: 100%;
+    padding: 0 30px;
+  }
+
+  .card {
+    margin-bottom: 20px;
+  }
+
+  /* Optimize grid for tablet */
+  .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .col-lg-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .card {
+    border-width: 0.5px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .navbar,
+  .footer,
+  .chatbot,
+  .back-button {
+    display: none !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .card {
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+  }
 }

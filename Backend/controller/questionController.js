@@ -34,7 +34,6 @@ async function postQuestion(req, res) {
       .status(StatusCodes.CREATED)
       .json({ message: "question posted successfully" });
   } catch (err) {
-    
     return res
       .status(500)
       .json({ message: "something went wrong, please try again later" + err });
@@ -69,6 +68,7 @@ async function getQuestionAndAnswer(req, res) {
           q.title, 
           q.description, 
           q.createdAt AS question_createdAt,
+          q.view_count,
           u2.username as question_username,
           a.answerid, 
           a.userid AS answer_userid, 
@@ -102,6 +102,7 @@ async function getQuestionAndAnswer(req, res) {
       description: rows[0].description,
       qtn_createdAt: rows[0].question_createdAt,
       qtn_username: rows[0].question_username,
+      view_count: rows[0].view_count || 0,
       answers: rows
         .map((answer) => ({
           answerid: answer.answerid,
@@ -121,4 +122,126 @@ async function getQuestionAndAnswer(req, res) {
       .json({ message: "Error fetching question details" + error });
   }
 }
-module.exports = { postQuestion, getAllQuestions, getQuestionAndAnswer };
+// Edit a question
+async function editQuestion(req, res) {
+  const { questionid, userid, title, description, tag } = req.body;
+
+  if (!questionid || !userid || !title || !description) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "All fields are required" });
+  }
+
+  try {
+    // Check if user owns the question
+    const [question] = await dbConnection.query(
+      "SELECT userid FROM questions WHERE questionid = ?",
+      [questionid]
+    );
+
+    if (question.length === 0) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Question not found" });
+    }
+
+    if (question[0].userid !== userid) {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ message: "You can only edit your own questions" });
+    }
+
+    // Update the question
+    await dbConnection.query(
+      "UPDATE questions SET title = ?, description = ?, tag = ? WHERE questionid = ?",
+      [title, description, tag, questionid]
+    );
+
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Question updated successfully" });
+  } catch (err) {
+    console.error("Error editing question:", err);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Something went wrong, please try again later" });
+  }
+}
+
+// Delete a question
+async function deleteQuestion(req, res) {
+  const { questionid, userid } = req.body;
+
+  if (!questionid || !userid) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Question ID and User ID are required" });
+  }
+
+  try {
+    // Check if user owns the question
+    const [question] = await dbConnection.query(
+      "SELECT userid FROM questions WHERE questionid = ?",
+      [questionid]
+    );
+
+    if (question.length === 0) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Question not found" });
+    }
+
+    if (question[0].userid !== userid) {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ message: "You can only delete your own questions" });
+    }
+
+    // Delete associated answers first (foreign key constraint)
+    await dbConnection.query("DELETE FROM answers WHERE questionid = ?", [
+      questionid,
+    ]);
+
+    // Delete the question
+    await dbConnection.query("DELETE FROM questions WHERE questionid = ?", [
+      questionid,
+    ]);
+
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Question deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting question:", err);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Something went wrong, please try again later" });
+  }
+}
+
+// Increment view count for a question
+async function incrementViewCount(req, res) {
+  const { questionId } = req.params;
+
+  try {
+    await dbConnection.query(
+      "UPDATE questions SET view_count = COALESCE(view_count, 0) + 1 WHERE questionid = ?",
+      [questionId]
+    );
+
+    return res.status(StatusCodes.OK).json({ message: "View count updated" });
+  } catch (err) {
+    console.error("Error incrementing view count:", err);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Something went wrong, please try again later" });
+  }
+}
+
+module.exports = {
+  postQuestion,
+  getAllQuestions,
+  getQuestionAndAnswer,
+  editQuestion,
+  deleteQuestion,
+  incrementViewCount,
+};

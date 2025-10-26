@@ -1,8 +1,68 @@
-/* Base Footer Styles */
+/* Base Footer Styles - Light Theme (Original) */
 .evangadi-footer {
   background-color: #3a4459;
   color: #fff;
   padding: 40px 20px;
+  transition: all 0.3s ease;
+}
+
+/* Social Icons - Light Theme */
+.evangadi-footer .social-icons a {
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.evangadi-footer .social-icons a:hover {
+  color: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+/* Links - Light Theme */
+.evangadi-footer .footer-link {
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.evangadi-footer .footer-link:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Headings - Light Theme */
+.evangadi-footer .footer-heading {
+  color: #fff;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
+
+/* Dark Theme Overrides */
+.evangadi-footer.dark-theme {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Social Icons - Dark Theme */
+.evangadi-footer.dark-theme .social-icons a {
+  color: var(--text-primary);
+}
+
+.evangadi-footer.dark-theme .social-icons a:hover {
+  color: var(--blue-main);
+}
+
+/* Links - Dark Theme */
+.evangadi-footer.dark-theme .footer-link {
+  color: var(--text-secondary);
+}
+
+.evangadi-footer.dark-theme .footer-link:hover {
+  color: var(--blue-main);
+}
+
+/* Headings - Dark Theme */
+.evangadi-footer.dark-theme .footer-heading {
+  color: var(--text-primary);
 }
 
 /* Container to center content and manage layout */
@@ -48,6 +108,15 @@
   color: #ff6600;
 }
 
+/* Dark mode links */
+[data-theme="dark"] .footer-link {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .footer-link:hover {
+  color: var(--primary-color);
+}
+
 /* Contact Column */
 .contact {
   text-align: center; /* Center all items in this column */
@@ -69,6 +138,16 @@
   color: #ff6600; /* hover color */
 }
 
+/* Dark mode contact items */
+[data-theme="dark"] .contact-item,
+[data-theme="dark"] .contact-item a {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .contact-item a:hover {
+  color: var(--primary-color);
+}
+
 /* Social Icons Styling */
 .social-icons a {
   display: inline-flex;
@@ -87,6 +166,17 @@
 .social-icons a:hover {
   background-color: #ff6600;
   color: #fff;
+}
+
+/* Dark mode social icons */
+[data-theme="dark"] .social-icons a {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+[data-theme="dark"] .social-icons a:hover {
+  background-color: var(--primary-color);
+  color: var(--text-primary);
 }
 
 /* ---------------------------------- */

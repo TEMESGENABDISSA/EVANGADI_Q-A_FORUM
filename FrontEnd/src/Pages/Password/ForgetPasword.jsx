@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../utility/axios";
 import classes from "./ForgetPasword.module.css";
+import { FaArrowLeft } from "react-icons/fa";
 
-export default function ForgotPassword() {
+export default function ForgotPassword({ onBack }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
@@ -26,6 +29,15 @@ export default function ForgotPassword() {
   return (
     <div className={classes.formcontainer}>
       <div className={classes.innerContainer}>
+        {/* Back Button */}
+        <button
+          type="button"
+          onClick={() => (onBack ? onBack() : navigate("/auth"))}
+          className={classes.backButton}
+        >
+          <FaArrowLeft className={classes.arrowIcon} /> Back to Login
+        </button>
+
         <h2>Forgot your password?</h2>
         <p>
           Enter your email address, and we'll send you a link to reset your

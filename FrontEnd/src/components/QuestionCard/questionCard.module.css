@@ -6,13 +6,15 @@
   border: 1.5px solid var(--blue-shade);
   margin-bottom: 20px;
   border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
-  background-color: #ffffff;
-  transition: transform 0.2s ease;
+  box-shadow: var(--shadow);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
 }
 
 .question_holder:hover {
   transform: scale(1.01);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* User icon and name */
@@ -57,18 +59,18 @@
 .question_title {
   font-weight: 600;
   font-size: 18px;
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .question_description {
   font-size: 16px;
   line-height: 1.5;
-  color: #333;
+  color: var(--text-secondary);
 }
 
 .question_date {
   font-size: 13px;
-  color: #555;
+  color: var(--text-muted);
   margin-top: 5px;
   display: flex;
   align-items: center;

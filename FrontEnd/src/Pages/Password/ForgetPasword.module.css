@@ -5,11 +5,13 @@
   margin: 0 auto;
   padding: 20px 30px;
   border-radius: 10px;
-  background-color: white;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 500px !important;
   max-width: 500px !important;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
-              rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
 }
 
 .innerContainer {
@@ -21,6 +23,7 @@ h2 {
   font-size: 18px;
   font-weight: bold;
   text-align: center;
+  color: var(--text-primary);
 }
 
 p {
@@ -28,21 +31,27 @@ p {
   margin-top: 5px;
   font-size: 16px;
   text-align: center;
+  color: var(--text-primary);
 }
 
 input {
   width: 100%;
   padding: 10px 15px;
   margin-bottom: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   font-size: 1rem;
   box-sizing: border-box;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
 }
 
 input:focus {
   outline: none;
   border: 1.5px solid var(--primary-shade);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .submitbtn {
@@ -72,13 +81,28 @@ input:focus {
 }
 
 .backButton {
-  margin-bottom: 15px;
-  background: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  background-color: transparent;
+  color: var(--text-primary);
   border: none;
-  color: var(--primary-color);
+  font-size: 15px;
   cursor: pointer;
-  font-size: 14px;
-  text-decoration: underline;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+.backButton:hover {
+  color: var(--blue-main);
+  background-color: var(--bg-secondary);
+}
+
+.arrowIcon {
+  font-size: 16px;
 }
 
 @media screen and (max-width: 768px) {

@@ -1,23 +1,23 @@
 const express = require("express");
 const router = express.Router();
-const OpenAI = require("openai");
 const dbConnection = require("../config/dbConfig");
+const { getGeminiResponse } = require("../utility/gemini");
 
-if (!process.env.OPENAI_API_KEY) {
-  console.warn(
-    "OPENAI_API_KEY not set — AI responses will fail until you add it to .env"
-  );
+// Coerce any incoming userId to a numeric DB-friendly value
+// - Logged-in users should already be numeric (string or number)
+// - Guests (ids like "guest-...") are mapped to 0
+function coerceDbUserId(userId) {
+  if (!userId) return 0;
+  const idStr = String(userId);
+  if (idStr.startsWith("guest-")) return 0;
+  const n = Number(idStr);
+  return Number.isFinite(n) ? n : 0;
 }
 
-// Create OpenAI client using new ES6 style
-const openai = new OpenAI.OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Helper: save a message into DB
+// Helper: save a message into DB using a string userId (supports guests)
 async function saveMessage(userId, sender, message) {
-  // If user is guest, store null for integer userId in DB
-  const dbUserId = userId === "guest" ? null : userId;
+  if (!userId) throw new Error("userId is required");
+  const dbUserId = coerceDbUserId(userId);
   await dbConnection.execute(
     "INSERT INTO chat_messages (userId, sender, message) VALUES (?, ?, ?)",
     [dbUserId, sender, message]
@@ -28,9 +28,9 @@ async function saveMessage(userId, sender, message) {
 router.get("/chat/:userId", async (req, res) => {
   const { userId } = req.params;
   try {
-    const dbUserId = userId === "guest" ? null : userId;
+    const dbUserId = coerceDbUserId(userId);
     const [rows] = await dbConnection.execute(
-      "SELECT id, sender, message, createdAt FROM chat_messages WHERE userId IS ? ORDER BY createdAt ASC",
+      "SELECT id, sender, message, createdAt FROM chat_messages WHERE userId = ? ORDER BY createdAt ASC",
       [dbUserId]
     );
     res.json(rows);
@@ -46,47 +46,18 @@ router.post("/chat", async (req, res) => {
   if (!message) return res.status(400).json({ error: "Missing message" });
 
   try {
-    const dbUserId = userId === "guest" ? null : userId;
-
     // Save user message
     await saveMessage(userId, "user", message);
 
     // Fetch previous conversation for context
+    const dbUserId = coerceDbUserId(userId);
     const [previous] = await dbConnection.execute(
-      "SELECT sender, message FROM chat_messages WHERE userId IS ? ORDER BY createdAt ASC",
+      "SELECT sender, message FROM chat_messages WHERE userId = ? ORDER BY createdAt ASC",
       [dbUserId]
     );
 
-    // Build messages for OpenAI
-    const conversationMemory = [
-      {
-        role: "system",
-        content:
-          "You are a helpful assistant for Evangadi forum. Be concise and polite.",
-      },
-    ];
-
-    for (const c of previous) {
-      conversationMemory.push({
-        role: c.sender === "user" ? "user" : "assistant",
-        content: c.message,
-      });
-    }
-
-    // Append latest user message
-    conversationMemory.push({ role: "user", content: message });
-
-    // Call OpenAI
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: conversationMemory,
-      max_tokens: 400,
-      temperature: 0.2,
-    });
-
-    const botReply =
-      response?.choices?.[0]?.message?.content?.trim() ||
-      "Sorry, I couldn't generate a response right now.";
+    // Get AI response using Gemini
+    const botReply = await getGeminiResponse(message, previous);
 
     // Save bot reply
     await saveMessage(userId, "bot", botReply);
@@ -95,7 +66,9 @@ router.post("/chat", async (req, res) => {
     res.json({ response: botReply });
   } catch (err) {
     console.error("POST /chat error:", err);
-    res.status(500).json({ error: "Error connecting to AI or DB" });
+    res
+      .status(500)
+      .json({ error: err?.message || "Error connecting to AI or DB" });
   }
 });
 
@@ -103,8 +76,8 @@ router.post("/chat", async (req, res) => {
 router.delete("/chat/:userId", async (req, res) => {
   const { userId } = req.params;
   try {
-    const dbUserId = userId === "guest" ? null : userId;
-    await dbConnection.execute("DELETE FROM chat_messages WHERE userId IS ?", [
+    const dbUserId = coerceDbUserId(userId);
+    await dbConnection.execute("DELETE FROM chat_messages WHERE userId = ?", [
       dbUserId,
     ]);
     res.json({ message: "Chat cleared successfully" });

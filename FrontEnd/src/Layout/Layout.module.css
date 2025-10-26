@@ -1,0 +1,25 @@
+.layout {
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+.layout.light {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.layout.dark {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.content {
+  min-height: calc(100vh - 200px); /* Adjust based on header/footer height */
+  transition: all 0.3s ease;
+}
+
+/* Ensure proper theme inheritance */
+.layout * {
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
+}

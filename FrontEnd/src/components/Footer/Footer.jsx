@@ -2,10 +2,16 @@ import style from "./Footer.module.css";
 import { FaFacebookF, FaYoutube } from "react-icons/fa";
 import { RiInstagramFill } from "react-icons/ri";
 import image from "../../Assets/Images/evangadi-logo-footer.png";
+import { useTheme } from "../../context/ThemeContext";
 
 const Footer = () => {
+  const { isDarkMode } = useTheme();
+  
   return (
-    <footer className={style["evangadi-footer"]}>
+    <footer 
+      className={`${style["evangadi-footer"]} ${isDarkMode ? style["dark-theme"] : ''}`}
+      data-theme={isDarkMode ? 'dark' : 'light'}
+    >
       <div className={style["footer-container"]}>
         {/* Column 1: Logo and Social Icons */}
         <div className={style["footer-column"]}>
