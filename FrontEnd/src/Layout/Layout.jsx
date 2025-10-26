@@ -1,6 +1,6 @@
 import Header from "../components/Header/Header.jsx";
 import Footer from "../components/Footer/Footer.jsx";
-import Chatbot from "../components/Chatbot/Chatbot";
+import Chatbot from "../components/Chatbot/Chatbot.jsx";
 import { useTheme } from "../context/ThemeContext";
 import classes from "./Layout.module.css";
 
