@@ -8,7 +8,9 @@ export default defineConfig({
   resolve: {
     alias: {
       // Ensure consistent path resolution
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      // Add explicit alias for Chatbot to ensure case sensitivity
+      '@/components/Chatbot/Chatbot.jsx': path.resolve(__dirname, './src/components/Chatbot/Chatbot.jsx')
     }
   },
   server: {

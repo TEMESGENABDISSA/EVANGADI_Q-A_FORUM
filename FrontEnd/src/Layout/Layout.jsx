@@ -1,7 +1,7 @@
-import Header from "@/components/Header/Header.jsx";
-import Footer from "@/components/Footer/Footer.jsx";
-import Chatbot from "@/components/Chatbot/Chatbot.jsx";
-import { useTheme } from "@/context/ThemeContext";
+import Header from "../components/Header/Header.jsx";
+import Footer from "../components/Footer/Footer.jsx";
+import Chatbot from "../components/Chatbot/Chatbot.jsx";
+import { useTheme } from "../context/ThemeContext";
 import classes from "./Layout.module.css";
 
 function Layout({ children }) {
