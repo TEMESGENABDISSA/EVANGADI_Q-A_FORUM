@@ -1,4 +1,4 @@
-import  { useContext, useRef } from "react";
+import  { useContext, useRef, useState } from "react";
 import classes from "./askQuestion.module.css";
 import { axiosInstance } from "../../utility/axios.js";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,6 +12,12 @@ function AskQuestion() {
   const { user } = useContext(UserState);
   const titleDom = useRef();
   const descriptionDom = useRef();
+  const [titleLength, setTitleLength] = useState(0);
+  const [descriptionLength, setDescriptionLength] = useState(0);
+  const MAX_TITLE_LENGTH = 200;
+  const MAX_DESCRIPTION_LENGTH = 2000;
+  const MIN_TITLE_LENGTH = 10;
+  const MIN_DESCRIPTION_LENGTH = 20;
   
   // Ensure we have a valid user ID or use a guest ID
   const getUserId = () => {
@@ -43,6 +49,27 @@ function AskQuestion() {
       return;
     }
     
+    // Validate minimum lengths
+    if (title.length < MIN_TITLE_LENGTH) {
+      await Swal.fire({
+        title: "Title Too Short",
+        text: `Title must be at least ${MIN_TITLE_LENGTH} characters long.`,
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+    
+    if (description.length < MIN_DESCRIPTION_LENGTH) {
+      await Swal.fire({
+        title: "Description Too Short",
+        text: `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters long.`,
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+    
     const tag = "General";
 
     try {
@@ -56,7 +83,6 @@ function AskQuestion() {
         validateStatus: (status) => status < 500 // Don't throw for 4xx errors
       });
       if (response.status === 201) {
-        console.log("Question created successfully");
         await Swal.fire({
           title: "Success!",
           text: "Question created successfully!",
@@ -65,7 +91,6 @@ function AskQuestion() {
         });
         navigate("/");
       } else {
-        console.error("Failed to create question");
         await Swal.fire({
           title: "Error",
           text: "Failed to create question",
@@ -74,7 +99,6 @@ function AskQuestion() {
         });
       }
     } catch (error) {
-      console.error(error);
       await Swal.fire({
         title: "Error",
         text: "Failed to create question. Please try again later.",
@@ -117,21 +141,41 @@ function AskQuestion() {
           </div>
           <div className={classes.question__header__titleTwo}>
             <form onSubmit={handleSubmit} className={classes.question__form}>
-              <input
-                className={classes.question__title2}
-                ref={titleDom}
-                type="text"
-                placeholder="Question title"
-                required
-              />
-              <textarea
-                rows={4}
-                className={classes.question__description}
-                ref={descriptionDom}
-                type="text"
-                placeholder="Question Description..."
-                required
-              />
+              <div className={classes.formGroup}>
+                <input
+                  className={classes.question__title2}
+                  ref={titleDom}
+                  type="text"
+                  placeholder="Question title"
+                  maxLength={MAX_TITLE_LENGTH}
+                  onChange={(e) => setTitleLength(e.target.value.length)}
+                  required
+                />
+                <div className={classes.charCounter}>
+                  {titleLength}/{MAX_TITLE_LENGTH} characters
+                  {titleLength > 0 && titleLength < MIN_TITLE_LENGTH && (
+                    <span className={classes.warningText}> (min {MIN_TITLE_LENGTH})</span>
+                  )}
+                </div>
+              </div>
+              <div className={classes.formGroup}>
+                <textarea
+                  rows={6}
+                  className={classes.question__description}
+                  ref={descriptionDom}
+                  type="text"
+                  placeholder="Question Description..."
+                  maxLength={MAX_DESCRIPTION_LENGTH}
+                  onChange={(e) => setDescriptionLength(e.target.value.length)}
+                  required
+                />
+                <div className={classes.charCounter}>
+                  {descriptionLength}/{MAX_DESCRIPTION_LENGTH} characters
+                  {descriptionLength > 0 && descriptionLength < MIN_DESCRIPTION_LENGTH && (
+                    <span className={classes.warningText}> (min {MIN_DESCRIPTION_LENGTH})</span>
+                  )}
+                </div>
+              </div>
               <div className={classes.buttonContainer}>
                 <button className={classes.question__button} type="submit">
                   Post Question

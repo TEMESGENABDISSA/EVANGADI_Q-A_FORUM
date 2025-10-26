@@ -1,8 +1,98 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaComment, FaTimes, FaPaperPlane } from 'react-icons/fa';
+import { FaComment, FaTimes, FaPaperPlane, FaRobot } from 'react-icons/fa';
 import { useTheme } from '../../context/ThemeContext';
 import axios from 'axios';
 import styles from './Chatbot.module.css';
+
+// Enhanced markdown parser
+// Enhanced markdown parser with code highlighting
+const parseMarkdown = (text) => {
+  if (!text) return '';
+  
+  let html = text;
+  let codeBlockId = 0;
+  
+  // Code blocks with language detection and copy button
+  html = html.replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
+    codeBlockId++;
+    const language = lang || 'javascript';
+    const trimmedCode = code.trim();
+    return `<div class="code-block-wrapper">
+      <div class="code-header">
+        <span class="code-language">${language}</span>
+        <button class="copy-code-btn" data-code-id="${codeBlockId}" onclick="copyCode('${codeBlockId}', this)" title="Copy code">
+          📋 Copy
+        </button>
+      </div>
+      <pre><code id="code-${codeBlockId}" class="language-${language}">${trimmedCode}</code></pre>
+    </div>`;
+  });
+  
+  // Inline code (`code`)
+  html = html.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+  
+  // Headings with icons
+  html = html.replace(/^### (.+)$/gm, '<h3>📌 $1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>📚 $1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>✨ $1</h1>');
+  
+  // Bold (**text** or __text__)
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+  
+  // Italic (*text* or _text_) - fixed to not conflict with bold
+  html = html.replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>');
+  html = html.replace(/(?<!_)_([^_]+?)_(?!_)/g, '<em>$1</em>');
+  
+  // Links with icon [text](url)
+  html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">🔗 $1</a>');
+  
+  // Blockquotes with icon (> text)
+  html = html.replace(/^> (.+)$/gm, '<blockquote>💡 $1</blockquote>');
+  
+  // Horizontal rule (---)
+  html = html.replace(/^---$/gm, '<hr class="styled-hr" />');
+  
+  // Task lists (- [ ] or - [x])
+  html = html.replace(/^- \[ \] (.+)$/gm, '<div class="task-item">☐ $1</div>');
+  html = html.replace(/^- \[x\] (.+)$/gm, '<div class="task-item completed">☑ $1</div>');
+  
+  // Highlights ==text==
+  html = html.replace(/==(.+?)==/g, '<mark>$1</mark>');
+  
+  // Line breaks
+  html = html.replace(/\n/g, '<br />');
+  
+  // Numbered lists
+  html = html.replace(/(\d+)\. /g, '$1. ');
+  
+  // Bullet points
+  html = html.replace(/• /g, '• ');
+  
+  return html;
+};
+
+// Copy code to clipboard function
+window.copyCode = (codeId, button) => {
+  const codeElement = document.getElementById(`code-${codeId}`);
+  if (codeElement) {
+    const code = codeElement.textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      button.textContent = '✅ Copied!';
+      button.style.backgroundColor = '#28a745';
+      setTimeout(() => {
+        button.textContent = '📋 Copy';
+        button.style.backgroundColor = '';
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      button.textContent = '❌ Failed';
+      setTimeout(() => {
+        button.textContent = '📋 Copy';
+      }, 2000);
+    });
+  }
+};
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +102,16 @@ const Chatbot = () => {
   const { isDarkMode } = useTheme();
   const messagesEndRef = useRef(null);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [toast, setToast] = useState(null);
+  const messagesContainerRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Show toast notification
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Check if it's user's first visit
   useEffect(() => {
@@ -46,6 +146,48 @@ const Chatbot = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Handle scroll to show/hide scroll button
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const isScrolledUp = container.scrollHeight - container.scrollTop - container.clientHeight > 100;
+      setShowScrollButton(isScrolledUp);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Ctrl/Cmd + K to focus input
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        if (isOpen) {
+          inputRef.current?.focus();
+        } else {
+          setIsOpen(true);
+          setTimeout(() => inputRef.current?.focus(), 100);
+        }
+      }
+      // Escape to close
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isOpen]);
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -136,7 +278,7 @@ const Chatbot = () => {
           text: response.data.response,
           sender: 'bot',
           timestamp: new Date().toISOString(),
-          userQuestion: message, // Store the user's question with the bot's response
+          userQuestion: safeMessage, // Store the user's question with the bot's response
           showSuggestions: true // Flag to show suggestions after this message
         };
         setMessages(prev => [...prev, botMessage]);
@@ -176,6 +318,24 @@ const Chatbot = () => {
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
+    if (!isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  };
+
+  // Clear chat function - instant clear with notification
+  const clearChat = () => {
+    setMessages([]);
+    showToast('💬 Chat cleared!', 'info');
+    setTimeout(() => {
+      const welcomeMessage = {
+        id: Date.now(),
+        text: 'How can I help you today?',
+        sender: 'bot',
+        timestamp: new Date().toISOString()
+      };
+      setMessages([welcomeMessage]);
+    }, 300);
   };
 
   // Common questions to suggest
@@ -237,13 +397,34 @@ const Chatbot = () => {
       {isOpen ? (
         <div className={`${styles.chatWindow} ${isDarkMode ? styles.dark : ''}`}>
           <div className={styles.chatHeader}>
-            <h3>Evangadi Assistant</h3>
-            <button onClick={toggleChat} className={styles.closeButton}>
-              <FaTimes />
-            </button>
+            <div className={styles.headerLeft}>
+              <FaRobot className={styles.robotIcon} />
+              <div>
+                <h3>Evangadi Assistant</h3>
+                <span className={styles.statusText}>🟢 Online</span>
+              </div>
+            </div>
+            <div className={styles.headerActions}>
+              <button 
+                onClick={clearChat} 
+                className={styles.clearButton} 
+                title="Clear chat"
+                aria-label="Clear chat history"
+              >
+                🗑️
+              </button>
+              <button 
+                onClick={toggleChat} 
+                className={styles.closeButton} 
+                title="Close chat"
+                aria-label="Close chat window"
+              >
+                <FaTimes />
+              </button>
+            </div>
           </div>
           
-          <div className={styles.messagesContainer}>
+          <div className={styles.messagesContainer} ref={messagesContainerRef}>
             {messages.length === 0 ? (
               <div className={styles.welcomeMessage}>
                 <p>Hello! I'm your Evangadi Forum assistant. How can I help you today?</p>
@@ -274,10 +455,7 @@ const Chatbot = () => {
                       </div>
                     )}
                     <div className={styles.messageText} dangerouslySetInnerHTML={{ 
-                      __html: msg.text
-                        .replace(/\n/g, '<br />')
-                        .replace(/(\d+)\.\s+/g, '$1. ')
-                        .replace(/•\s+/g, '• ')
+                      __html: parseMarkdown(msg.text)
                     }} />
                     {msg.showSuggestions && (
                       <div className={styles.suggestionsContainer}>
@@ -301,17 +479,40 @@ const Chatbot = () => {
               </div>
             )}
             <div ref={messagesEndRef} />
+            {showScrollButton && (
+              <button 
+                className={styles.scrollToBottomBtn}
+                onClick={scrollToBottom}
+                title="Scroll to bottom"
+                aria-label="Scroll to latest message"
+              >
+                ⬇️
+              </button>
+            )}
+          </div>
+          
+          {/* Toast Notification */}
+          {toast && (
+            <div className={`${styles.toast} ${styles[toast.type]}`}>
+              {toast.message}
+            </div>
+          )}
+          
+          <div>
           </div>
           
           <form onSubmit={handleSendMessage} className={styles.messageForm}>
             <input
+              ref={inputRef}
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type your message..."
+              placeholder="Type your message... (Ctrl+K to focus)"
               className={styles.messageInput}
               disabled={isTyping}
+              maxLength={500}
             />
+            <span className={styles.charCounter}>{message.length}/500</span>
             <button 
               type="submit" 
               className={styles.sendButton}

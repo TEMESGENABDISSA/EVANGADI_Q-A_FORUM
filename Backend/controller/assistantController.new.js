@@ -1,4 +1,4 @@
-const dbConnection = require('../config/dbConfig');
+const { pool: dbConnection } = require('../config/dbConfig');
 const gemini = require('../utility/gemini');
 const getGeminiResponse = gemini.getGeminiResponse;
 

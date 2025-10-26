@@ -1,37 +1,45 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const db = require('./config/dbConfig');
+const { pool } = db;
 
 // Initialize express app
 const app = express();
-const port = process.env.PORT || 5001;
+const net = require('net');
+
+// Function to check if a port is available
+const isPortAvailable = (port) => {
+  return new Promise((resolve) => {
+    const server = net.createServer()
+      .once('error', () => resolve(false))
+      .once('listening', () => {
+        server.close();
+        resolve(true);
+      })
+      .listen(port);
+  });
+};
+
+// Function to get the next available port
+const getAvailablePort = async (startPort) => {
+  let port = startPort;
+  while (!(await isPortAvailable(port))) {
+    port++;
+    // Safety check to prevent infinite loop
+    if (port > startPort + 100) {
+      throw new Error('Could not find an available port');
+    }
+  }
+  return port;
+};
+
+// Get the port from environment or use 5001 as default
+const startPort = parseInt(process.env.PORT) || 5001;
+let port = startPort;
 
 // Set environment variables
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-
-// CORS configuration
-app.use((req, res, next) => {
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' 'inline-speculation-rules' 'strict-dynamic' https: http:; " +
-    "style-src 'self' 'unsafe-inline' https: http:; " +
-    "img-src 'self' data: https: http:; " +
-    "font-src 'self' https: http: data:; " +
-    "connect-src 'self' http://localhost:5000 ws://localhost:5000 http://localhost:3000 http://localhost:5173 ws://localhost:5173 http://127.0.0.1:5173 ws:; " +
-    "frame-ancestors 'self'; " +
-    "form-action 'self'; " +
-    "base-uri 'self'; " +
-    "object-src 'none';"
-  );
-  
-  // Additional headers for CORS
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  
-  next();
-});
 
 // CORS Configuration
 const allowedOrigins = [
@@ -41,29 +49,73 @@ const allowedOrigins = [
   'http://localhost:5000'
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+// CORS middleware with credentials support
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Allow requests with no origin (like mobile apps or curl requests)
+  if (process.env.NODE_ENV === 'development' || !origin || allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  }
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
+
+// Security headers middleware
+app.use((req, res, next) => {
+  // Set Content Security Policy
+  if (process.env.NODE_ENV === 'development') {
+    // Development CSP (more permissive)
+    const nonce = require('crypto').randomBytes(16).toString('base64');
+    const csp = [
+      "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;",
+      "connect-src 'self' http://localhost:* https://*.aivencloud.com wss: http: https: chrome-extension:;",
+      "img-src 'self' data: blob: https:;",
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' 'nonce-${nonce}' 'strict-dynamic' https: http: chrome-extension: 'sha256-kPx0AsF0oz2kKiZ875xSvv693TBHkQ/0SkMJZnnNpnQ=';`,
+      "script-src-attr 'unsafe-inline' 'self';",
+      "style-src 'self' 'unsafe-inline' https: chrome-extension: data:;",
+      "frame-src 'self' https:;",
+      "child-src 'self' blob:;",
+      "worker-src 'self' blob:;",
+      "font-src 'self' https: data:;",
+      "connect-src 'self' http://localhost:* https: http: ws: wss: chrome-extension:;"
+    ].join(' ');
     
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: true,
-  optionsSuccessStatus: 200,
-  preflightContinue: false,
-  exposedHeaders: ['Content-Range', 'X-Content-Range']
-};
-
-app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
+    res.setHeader('Content-Security-Policy', csp);
+  } else {
+    // Production CSP (more restrictive but still allowing necessary functionality)
+    const nonce = require('crypto').randomBytes(16).toString('base64');
+    const csp = [
+      "default-src 'self';",
+      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https: http: chrome-extension: 'sha256-kPx0AsF0oz2kKiZ875xSvv693TBHkQ/0SkMJZnnNpnQ=';`,
+      `script-src-elem 'self' 'unsafe-inline' https: http:;`,
+      "script-src-attr 'unsafe-inline' 'self';",
+      "style-src 'self' 'unsafe-inline' https: chrome-extension: data:;",
+      "img-src 'self' data: blob: https:;",
+      "font-src 'self' https: data:;",
+      "connect-src 'self' https: http://localhost:* ws: wss: chrome-extension:;",
+      "frame-src 'self' https:;"
+    ].join(' ');
+    
+    res.setHeader('Content-Security-Policy', csp);
+  }
+  
+  // Other security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  next();
+});
 
 // Body parsers
 app.use(express.json({ limit: '10mb' }));
@@ -71,6 +123,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // DB connection
 const dbConnection = require("./config/dbConfig");
+
+// Import routes
+const userRoutes = require("./routes/userRoutes");
+const questionRoutes = require("./routes/questionRoute");
+const answerRoutes = require("./routes/answerRoute");
+
+// Use routes
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1", questionRoutes);
+app.use("/api/v1", answerRoutes);
 
 // Process error handling
 process.on('uncaughtException', (error) => {
@@ -81,15 +143,6 @@ process.on('uncaughtException', (error) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
-
-const userRoutes = require("./routes/userRoutes");
-app.use("/api/v1/user", userRoutes);
-
-const questionRoutes = require("./routes/questionRoute");
-app.use("/api/v1", questionRoutes);
-
-const answerRoutes = require("./routes/answerRoute");
-app.use("/api/v1", answerRoutes);
 
 // Chat routes (legacy)
 // const chatRoutes = require("./routes/chatRoute");
@@ -114,16 +167,53 @@ app.get("/", (req, res) => {
   res.status(200).send("this is  Evangadi forum");
 });
 
-//start server
-async function start() {
+// Start server with database connection check
+const start = async () => {
   try {
-    await dbConnection.execute("SELECT 'test'");
-    console.log("Database connected successfully");
-    await app.listen(port);
-    console.log(`Server running at http://localhost:${port}`);
-  } catch (err) {
-    console.error(err.message);
+    // Test database connection
+    const isDbConnected = await db.testConnection();
+    if (!isDbConnected) {
+      console.error('❌ Server cannot start without database connection');
+      process.exit(1);
+    }
+
+    // Find an available port
+    port = await getAvailablePort(port);
+    const isOriginalPort = port === startPort;
+    
+    // Start the server
+    const server = app.listen(port, () => {
+      if (!isOriginalPort) {
+        console.log(`\n⚠️  Port ${startPort} was in use, using port ${port} instead`);
+      }
+      console.log(`\n🚀 Server running at http://localhost:${port}`);
+      console.log(`🌐 Environment: ${process.env.NODE_ENV}`);
+      console.log(`🕒 ${new Date().toLocaleString()}\n`);
+    });
+
+    // Handle server errors
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${port} is already in use`);
+      } else {
+        console.error('❌ Server error:', error.message);
+      }
+      process.exit(1);
+    });
+
+    // Handle process termination
+    process.on('SIGTERM', () => {
+      console.log('\n🛑 Received SIGTERM. Shutting down gracefully...');
+      server.close(() => {
+        console.log('💤 Server stopped');
+        process.exit(0);
+      });
+    });
+
+  } catch (error) {
+    console.error('❌ Fatal error during server startup:', error.message);
+    process.exit(1);
   }
-}
+};
 
 start();

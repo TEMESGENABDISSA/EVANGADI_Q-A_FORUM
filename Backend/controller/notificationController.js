@@ -1,4 +1,4 @@
-const dbConnection = require("../config/dbConfig");
+const { pool: dbConnection } = require("../config/dbConfig");
 const { StatusCodes } = require("http-status-codes");
 
 // Get notifications for a user

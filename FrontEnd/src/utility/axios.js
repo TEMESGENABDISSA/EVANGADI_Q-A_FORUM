@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// Prefer explicit API base URL from env; fallback to localhost:5000
+// Prefer explicit API base URL from env; fallback to localhost:5001
 const apiBaseUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
+  import.meta.env.VITE_API_URL || "http://localhost:5001/api/v1";
 
 // Create axios instance with default config
 export const axiosInstance = axios.create({

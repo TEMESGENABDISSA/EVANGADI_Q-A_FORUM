@@ -1,5 +1,5 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const dbConnection = require('../config/dbConfig');
+const { pool: dbConnection } = require('../config/dbConfig');
 
 // Initialize Google's Generative AI
 const genAI = process.env.GEMINI_API_KEY

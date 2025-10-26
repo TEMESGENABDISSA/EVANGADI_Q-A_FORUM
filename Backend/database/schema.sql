@@ -1,81 +1,86 @@
 -- Database schema for Evangadi Forum
 
 -- Enable UUID extension if not already enabled
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100),
     bio TEXT,
     profile_picture_url VARCHAR(255),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    last_login TIMESTAMPTZ
-);
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_login TIMESTAMP NULL,
+    reputation INT DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Questions table
 CREATE TABLE IF NOT EXISTS questions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    question_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    user_id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    views INTEGER DEFAULT 0,
-    votes INTEGER DEFAULT 0,
+    views INT DEFAULT 0,
+    votes INT DEFAULT 0,
     is_answered BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Answers table
 CREATE TABLE IF NOT EXISTS answers (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    answer_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    question_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
     content TEXT NOT NULL,
-    votes INTEGER DEFAULT 0,
+    votes INT DEFAULT 0,
     is_accepted BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    CONSTRAINT unique_question_user UNIQUE(question_id, user_id)
-);
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (question_id) REFERENCES questions(question_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_question_user (question_id, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tags table
 CREATE TABLE IF NOT EXISTS tags (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tag_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
     name VARCHAR(50) UNIQUE NOT NULL,
     description TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Question_Tags junction table
 CREATE TABLE IF NOT EXISTS question_tags (
-    question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
-    tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    PRIMARY KEY (question_id, tag_id)
-);
+    question_id VARCHAR(36) NOT NULL,
+    tag_id VARCHAR(36) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (question_id, tag_id),
+    FOREIGN KEY (question_id) REFERENCES questions(question_id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Votes table (for both questions and answers)
 CREATE TABLE IF NOT EXISTS votes (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    content_type VARCHAR(10) NOT NULL CHECK (content_type IN ('question', 'answer')),
-    content_id UUID NOT NULL,
-    vote_value SMALLINT NOT NULL CHECK (vote_value IN (-1, 1)), -- -1 for downvote, 1 for upvote
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(user_id, content_type, content_id)
-);
+    vote_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    user_id VARCHAR(36) NOT NULL,
+    content_type ENUM('question', 'answer') NOT NULL,
+    content_id VARCHAR(36) NOT NULL,
+    vote_value TINYINT NOT NULL CHECK (vote_value IN (-1, 1)),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_content (user_id, content_type, content_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Indexes for better performance
 CREATE INDEX idx_questions_user_id ON questions(user_id);
 CREATE INDEX idx_answers_question_id ON answers(question_id);
 CREATE INDEX idx_answers_user_id ON answers(user_id);
-CREATE INDEX idx_question_tags_question_id ON question_tags(question_id);
-CREATE INDEX idx_question_tags_tag_id ON question_tags(tag_id);
 CREATE INDEX idx_votes_content ON votes(content_type, content_id);
 
 -- Create a function to update updated_at timestamps

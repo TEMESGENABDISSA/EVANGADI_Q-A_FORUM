@@ -91,7 +91,7 @@
 
 .actionButton {
   background: none;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color, #ddd);
   border-radius: 4px;
   padding: 8px 12px;
   cursor: pointer;
@@ -100,11 +100,11 @@
   align-items: center;
   gap: 4px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .actionButton:hover {
-  background-color: #f5f5f5;
+  background-color: var(--bg-hover, #f5f5f5);
   transform: translateY(-1px);
 }
 
@@ -131,7 +131,10 @@
 .questionTitle {
   font-weight: 700;
   font-size: 26px;
-  color: #111;
+  color: var(--text-primary);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .questionDescription {
@@ -139,18 +142,21 @@
   line-height: 1.6;
   padding-left: 10px;
   border-left: 3px solid var(--blue-shade);
-  color: #222;
+  color: var(--text-primary);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .question_date {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary, #666);
   margin-top: 8px;
 }
 
 .viewCount {
   font-size: 13px;
-  color: #888;
+  color: var(--text-tertiary, #888);
   font-weight: 500;
 }
 
@@ -159,7 +165,7 @@
   font-size: 20px;
   font-weight: 600;
   margin: 20px 0 10px 0;
-  color: #222;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
 }
@@ -173,14 +179,14 @@
   padding: 15px;
   gap: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
-  background-color: #fafafa;
+  background-color: var(--bg-secondary, #fafafa);
   transition: all 0.3s ease;
   flex-wrap: wrap;
 }
 
 .answer_holder:hover {
   transform: scale(1.01);
-  background-color: #f0f8ff;
+  background-color: var(--bg-hover, #f0f8ff);
 }
 
 .account_holder {
@@ -194,7 +200,7 @@
 .profileName {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary, #333);
 }
 
 .answerContent {
@@ -221,7 +227,7 @@
 .voteCount {
   font-size: 14px;
   font-weight: 600;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .voteButtons {
@@ -306,11 +312,11 @@
 
 .acceptedAnswer {
   border-left: 4px solid #28a745;
-  background-color: #f8fff8;
+  background-color: var(--bg-success, #f8fff8);
 }
 
 .acceptedAnswer .answerText {
-  color: #155724;
+  color: var(--text-success, #155724);
 }
 
 .acceptedBadge {
@@ -326,8 +332,8 @@
 
 /* Edit Forms */
 .editForm {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background-color: var(--bg-secondary, #f8f9fa);
+  border: 1px solid var(--border-color, #e9ecef);
   border-radius: 8px;
   padding: 20px;
   margin: 20px 0;
@@ -336,7 +342,7 @@
 
 .editForm h3 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: var(--text-primary, #333);
   font-size: 18px;
 }
 
@@ -348,7 +354,7 @@
   display: block;
   margin-bottom: 5px;
   font-weight: 600;
-  color: #555;
+  color: var(--text-secondary, #555);
 }
 
 .formInput,
@@ -356,11 +362,13 @@
 .formSelect {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color, #ddd);
   border-radius: 4px;
   font-size: 14px;
   font-family: inherit;
   transition: border-color 0.3s ease;
+  background-color: var(--bg-primary, #fff);
+  color: var(--text-primary, #333);
 }
 
 .formInput:focus,
@@ -378,7 +386,7 @@
 
 .charCounter {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary, #666);
   text-align: right;
   margin-top: 5px;
 }
@@ -429,15 +437,17 @@
 
 .answerText {
   font-size: 16px;
-  color: #111;
+  color: var(--text-primary);
   margin-bottom: 5px;
   line-height: 1.5;
   word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .answer_date {
   font-size: 13px;
-  color: #777;
+  color: var(--text-secondary, #777);
 }
 
 /* Pagination */
@@ -471,7 +481,7 @@
 
 .pageInfo {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   text-align: center;
   margin: 5px 0;
   flex: 1;
@@ -742,4 +752,66 @@
     padding: 6px 10px;
     font-size: 11px;
   }
+}
+
+/* ========================================
+   DARK MODE SUPPORT - CSS VARIABLES
+   ======================================== */
+
+/* Light mode defaults (inherited from root) */
+.container.light {
+  --text-primary: #1a1a1a;
+  --text-secondary: #666;
+  --text-tertiary: #888;
+  --text-success: #155724;
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-hover: #f0f8ff;
+  --bg-success: #f8fff8;
+  --border-color: #ddd;
+}
+
+/* Dark mode overrides */
+.container.dark {
+  --text-primary: #e4e4e4;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #909090;
+  --text-success: #a8e6a8;
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-hover: #3a3a3a;
+  --bg-success: #1e3d1e;
+  --border-color: #444;
+}
+
+/* Global dark mode support */
+[data-theme='dark'] {
+  --text-primary: #e4e4e4;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #909090;
+  --text-success: #a8e6a8;
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-hover: #3a3a3a;
+  --bg-success: #1e3d1e;
+  --border-color: #444;
+}
+
+/* Ensure answer holder has proper visibility in dark mode */
+[data-theme='dark'] .answer_holder {
+  background-color: var(--bg-secondary);
+  border-color: var(--blue-shade);
+}
+
+[data-theme='dark'] .answer_holder:hover {
+  background-color: var(--bg-hover);
+}
+
+[data-theme='dark'] .editForm {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .acceptedAnswer {
+  background-color: var(--bg-success);
 }

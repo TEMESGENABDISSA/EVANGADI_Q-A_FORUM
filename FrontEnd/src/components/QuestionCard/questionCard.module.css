@@ -60,12 +60,18 @@
   font-weight: 600;
   font-size: 18px;
   color: var(--text-primary);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .question_description {
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.4;
   color: var(--text-secondary);
+  max-height: 2.8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .question_date {
@@ -78,6 +84,93 @@
 
 .question_arrow_holder {
   margin-right: 10px;
+}
+
+/* Title with badge container */
+.titleWithBadge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Answer badge (green with checkmark) */
+.answerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #28a745;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.answerIcon {
+  font-size: 12px;
+}
+
+/* No answer badge (gray/orange) */
+.noAnswerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #FE9119;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.noAnswerIcon {
+  font-size: 12px;
+}
+
+/* Question meta (date + answer count) */
+.questionMeta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+/* Answer count badge (smaller, at bottom) */
+.answerCountBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--blue-shade);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.commentIcon {
+  font-size: 11px;
+}
+
+/* View count badge (gray, at bottom) */
+.viewCountBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #6c757d;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.eyeIcon {
+  font-size: 11px;
 }
 
 /* Responsive grid layout for even number of questions */

@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const dbConnection = require("../config/dbConfig");
+const { pool: dbConnection } = require("../config/dbConfig");
 const crypto = require("crypto");
 
 // post questions / ask questions
@@ -32,7 +32,7 @@ async function postQuestion(req, res) {
     );
     return res
       .status(StatusCodes.CREATED)
-      .json({ message: "question posted successfully" });
+      .json({ message: "question posted successfully", questionId: questionid });
   } catch (err) {
     return res
       .status(500)
@@ -44,7 +44,7 @@ async function postQuestion(req, res) {
 async function getAllQuestions(req, res) {
   try {
     const [questions] =
-      await dbConnection.query(`select q.questionid, q.title, q.description,q.createdAt, u.username from questions q   
+      await dbConnection.query(`select q.questionid, q.title, q.description, q.createdAt, u.username from questions q   
      inner join users u on q.userid = u.userid  order by q.createdAt desc`);
     return res.status(StatusCodes.OK).json({
       message: questions,

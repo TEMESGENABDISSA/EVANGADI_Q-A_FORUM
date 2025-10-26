@@ -23,11 +23,11 @@ function App() {
       const userData = await axiosInstance
         .get("/user/check", { headers: { Authorization: "Bearer " + token } })
         .then((response) => response.data);
-      setUser(userData);
+      // Extract the user object from the response
+      setUser(userData.user);
       // If user is logged in, redirect to home
       navigate("/home");
     } catch (error) {
-      console.log(error);
       // Invalid token → clear and continue as guest
       localStorage.removeItem("Evangadi_Forum");
       setUser(null);

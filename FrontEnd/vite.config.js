@@ -6,20 +6,26 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    headers: {
+    headers: process.env.NODE_ENV === 'production' ? {
       'Content-Security-Policy': [
         "default-src 'self';",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' 'strict-dynamic' http://localhost:5173;",
-        "script-src-elem 'self' 'unsafe-inline' http://localhost:5173;",
-        "style-src 'self' 'unsafe-inline';",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' 'strict-dynamic';",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
         "img-src 'self' data: blob:;",
-        "connect-src 'self' ws://localhost:* http://localhost:*;",
-        "font-src 'self' data:;",
-        "object-src 'none';",
-        "base-uri 'self';",
-        "frame-ancestors 'none';",
-        "form-action 'self';",
-        "upgrade-insecure-requests;"
+        "connect-src 'self' http://localhost:5000 https://*.googleapis.com;",
+        "font-src 'self' data: https://fonts.gstatic.com;",
+        "frame-src 'self';",
+        "object-src 'none'"
+      ].join(' ')
+    } : {
+      'Content-Security-Policy': [
+        "default-src 'self';",
+        "script-src * 'unsafe-inline' 'unsafe-eval';",
+        "style-src * 'unsafe-inline';",
+        "img-src * data: blob:;",
+        "connect-src *;",
+        "font-src * data:;",
+        "frame-src *;"
       ].join(' ')
     },
     proxy: {

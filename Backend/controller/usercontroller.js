@@ -1,4 +1,4 @@
-const dbConnection = require("../config/dbConfig");
+const { pool } = require("../config/dbConfig");
 const bcrypt = require("bcrypt");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
@@ -7,139 +7,267 @@ const nodemailer = require("nodemailer");
 
 dotenv.config();
 
+// Register a new user
 async function register(req, res) {
-  const { username, firstname, lastname, email, password } = req.body;
-  if (!username || !firstname || !lastname || !email || !password) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "Please provide all required fields." });
-  }
-
-  if (password.length < 8) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "Password should be at least 8 characters long." });
-  }
-
-  try {
-    const [user] = await dbConnection.query(
-      "SELECT username, userid FROM users WHERE username = ? OR email = ?",
-      [username, email]
-    );
-
-    if (user.length > 0) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "Username or Email already exists." });
+    const { username, email, password, full_name } = req.body;
+    
+    // If full_name is not provided, try to get it from firstname and lastname (for backward compatibility)
+    const nameToUse = full_name || (req.body.firstname && req.body.lastname 
+        ? `${req.body.firstname} ${req.body.lastname}` 
+        : null);
+        
+    if (!username || !email || !password || !nameToUse) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ 
+            success: false,
+            message: "Please provide all required fields: username, email, password, and full_name (or firstname and lastname)." 
+        });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const timestamp = new Date();
-    timestamp.setHours(timestamp.getHours() + 3);
-    const formattedTimestamp = timestamp
-      .toISOString()
-      .slice(0, 19)
-      .replace("T", " ");
+    if (password.length < 8) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ 
+            success: false,
+            message: "Password should be at least 8 characters long." 
+        });
+    }
 
-    await dbConnection.query(
-      "INSERT INTO users (username, firstname, lastname, email, password, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
-      [username, firstname, lastname, email, hashedPassword, formattedTimestamp]
-    );
+    try {
+        // Start a transaction
+        await pool.query('START TRANSACTION');
 
-    res.status(StatusCodes.CREATED).json({ msg: "User created successfully." });
-  } catch (err) {
-    console.error(err);
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "Internal server error." });
-  }
+        // Check if username or email already exists
+        const [existingUsers] = await pool.query(
+            `SELECT username, userid FROM users WHERE username = ? OR email = ?`,
+            [username, email]
+        );
+
+        if (existingUsers && existingUsers.length > 0) {
+            const existingUser = existingUsers[0];
+            if (existingUser.username === username) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    success: false,
+                    message: "Username already exists. Please choose a different username."
+                });
+            } else {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    success: false,
+                    message: "Email is already registered. Please use a different email or login."
+                });
+            }
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Insert new user
+        const [result] = await pool.query(
+            `INSERT INTO users (username, email, password_hash, full_name) 
+             VALUES (?, ?, ?, ?)`,
+            [username, email, hashedPassword, nameToUse]
+        );
+
+        // Get the newly created user
+        const [newUser] = await pool.query(
+            `SELECT userid, username, email, full_name, createdAt 
+             FROM users WHERE userid = ?`,
+            [result.insertId]
+        );
+
+        await pool.query('COMMIT');
+
+        res.status(StatusCodes.CREATED).json({
+            success: true,
+            message: "User registered successfully",
+            user: newUser[0]
+        });
+    } catch (err) {
+        await pool.query('ROLLBACK');
+        console.error('Registration error:', err);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "An error occurred during registration. Please try again.",
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+    }
 }
 
+// User login
 async function login(req, res) {
-  const { usernameOrEmail, password } = req.body;
-  if (!usernameOrEmail || !password) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "Your email or password is incorrect." });
-  }
+    const { email, usernameOrEmail, password } = req.body;
+    
+    // Accept either 'email' or 'usernameOrEmail' field
+    const loginIdentifier = email || usernameOrEmail;
 
-  try {
-    const [user] = await dbConnection.query(
-      "SELECT username, userid, password FROM users WHERE email = ? OR username = ?",
-      [usernameOrEmail, usernameOrEmail]
-    );
-
-    if (user.length === 0) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ msg: "Invalid credentials." });
+    if (!loginIdentifier || !password) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+            success: false,
+            message: 'Please provide both email/username and password.'
+        });
     }
 
-    const isMatch = await bcrypt.compare(password, user[0].password);
-    if (!isMatch) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "Invalid credentials." });
+    try {
+        // Find user by email OR username
+        const [users] = await pool.query(
+            'SELECT userid, username, email, password_hash, full_name FROM users WHERE email = ? OR username = ?',
+            [loginIdentifier, loginIdentifier]
+        );
+
+        if (users.length === 0) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                success: false,
+                message: 'Invalid email or password.'
+            });
+        }
+
+        const user = users[0];
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+        if (!isPasswordValid) {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                success: false,
+                message: 'Invalid email or password.'
+            });
+        }
+
+        // Update last login time
+        await pool.query(
+            'UPDATE users SET last_login = NOW() WHERE userid = ?',
+            [user.userid]
+        );
+
+        // Create JWT token
+        const token = jwt.sign(
+            { userid: user.userid, username: user.username, email: user.email },
+            process.env.JWT_SECRET || 'your-secret-key',
+            { expiresIn: '24h' }
+        );
+
+        // Remove sensitive data before sending response
+        const { password_hash, ...userData } = user;
+
+        res.status(StatusCodes.OK).json({
+            success: true,
+            message: 'Login successful',
+            token,
+            user: userData
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: 'An error occurred during login. Please try again.'
+        });
     }
-
-    const token = jwt.sign(
-      { username: user[0].username, userid: user[0].userid },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    res
-      .status(StatusCodes.OK)
-      .json({ msg: "User logged in successfully", token });
-  } catch (err) {
-    console.error(err);
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "Internal server error." });
-  }
 }
 
 function check(req, res) {
-  const { username, userid } = req.user;
-  res.status(StatusCodes.OK).json({ username, userid });
+  try {
+    // Ensure user is authenticated
+    if (!req.user || !req.user.userid) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        success: false,
+        message: 'Not authenticated'
+      });
+    }
+    
+    // Return user information (excluding sensitive data)
+    const { userid, username, email, full_name } = req.user;
+    res.status(StatusCodes.OK).json({
+      success: true,
+      user: {
+        userid,
+        username,
+        email,
+        full_name
+      }
+    });
+  } catch (error) {
+    console.error('Check authentication error:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'An error occurred while checking authentication status.'
+    });
+  }
 }
 
 async function forgotPassword(req, res) {
   const { email } = req.body;
-  if (!email)
-    return res.status(400).json({ msg: "Please provide an email address." });
+  
+  if (!email) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ 
+      success: false,
+      msg: "Please provide an email address." 
+    });
+  }
 
   try {
-    const [user] = await dbConnection.query(
-      "SELECT * FROM users WHERE email = ?",
+    // Check if user exists
+    const [users] = await pool.query(
+      "SELECT userid, email FROM users WHERE email = ?",
       [email]
     );
-    if (user.length === 0)
-      return res.status(404).json({ msg: "No user found with that email." });
+    
+    if (users.length === 0) {
+      // For security reasons, don't reveal if the email exists or not
+      return res.status(StatusCodes.OK).json({ 
+        success: true,
+        msg: "If an account with that email exists, a password reset link has been sent." 
+      });
+    }
 
-    const token = jwt.sign({ userid: user[0].userid }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const user = users[0];
+    
+    // Create a reset token that expires in 1 hour
+    const token = jwt.sign(
+      { userid: user.userid }, 
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '1h' }
+    );
+    
+    // In a real app, you might want to store this token in the database
+    // with an expiration time and check it when resetting the password
+    
     const resetLink = `http://localhost:5173/reset-password/${token}`;
+    
+    // Only try to send email if email configuration is set up
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: { 
+            user: process.env.EMAIL_USER, 
+            pass: process.env.EMAIL_PASS 
+          },
+        });
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: "Password Reset - Evangadi Forum",
+          html: `
+            <p>You requested a password reset for your Evangadi Forum account.</p>
+            <p>Click the link below to reset your password (valid for 1 hour):</p>
+            <p><a href="${resetLink}">${resetLink}</a></p>
+            <p>If you didn't request this, please ignore this email.</p>
+          `,
+        });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+        // Continue with the response even if email fails
+      }
+    } else {
+      console.log('Email configuration not set. Reset link:', resetLink);
+    }
+
+    // Always return the same response for security reasons
+    res.status(StatusCodes.OK).json({ 
+      success: true,
+      msg: "If an account with that email exists, a password reset link has been sent." 
     });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Password Reset",
-      html: `<p>Click the link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`,
-    });
-
-    res
-      .status(200)
-      .json({ msg: "Password reset link has been sent to your email." });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: "Internal server error." });
+    console.error('Forgot password error:', err);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      success: false,
+      msg: "An error occurred while processing your request." 
+    });
   }
 }
 
@@ -148,24 +276,38 @@ async function resetPassword(req, res) {
   const { password } = req.body;
 
   if (!password || password.length < 8) {
-    return res
-      .status(400)
-      .json({ msg: "Password is required and must be at least 8 characters." });
+    return res.status(StatusCodes.BAD_REQUEST).json({ 
+      success: false,
+      msg: "Password is required and must be at least 8 characters." 
+    });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userid = decoded.userid;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const userId = decoded.userid;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await dbConnection.query("UPDATE users SET password = ? WHERE userid = ?", [
-      hashedPassword,
-      userid,
-    ]);
-    res.status(200).json({ msg: "Password has been reset successfully." });
+    await pool.query(
+      "UPDATE users SET password_hash = ? WHERE userid = ?",
+      [hashedPassword, userId]
+    );
+    
+    res.status(StatusCodes.OK).json({ 
+      success: true,
+      msg: "Password has been reset successfully." 
+    });
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ msg: "Invalid or expired reset link." });
+    console.error('Password reset error:', err);
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(StatusCodes.BAD_REQUEST).json({ 
+        success: false,
+        msg: "Invalid or expired reset link." 
+      });
+    }
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      success: false,
+      msg: "An error occurred while resetting the password." 
+    });
   }
 }
 

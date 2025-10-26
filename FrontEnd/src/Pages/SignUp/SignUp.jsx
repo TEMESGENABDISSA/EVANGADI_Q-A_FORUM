@@ -210,7 +210,7 @@ function Signup({ onSwitch }) {
         // Immediately log the user in after registration
         try {
           const loginResponse = await axiosInstance.post("/user/login", {
-            usernameOrEmail: formData.email,
+            email: formData.email,
             password: formData.password,
           });
 

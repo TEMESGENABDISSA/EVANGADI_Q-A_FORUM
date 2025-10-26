@@ -1,4 +1,4 @@
-const dbConnection = require("../config/dbConfig");
+const { pool: dbConnection } = require("../config/dbConfig");
 const { getGeminiResponse } = require("../utility/gemini");
 
 // Format response with proper markdown and structure

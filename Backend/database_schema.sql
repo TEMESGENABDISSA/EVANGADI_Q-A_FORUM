@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS questions (
     title VARCHAR(500) NOT NULL,
     description TEXT NOT NULL,
     tag VARCHAR(100) DEFAULT 'General',
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     view_count INT DEFAULT 0,
     isResolved BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS answers (
     questionid VARCHAR(255) NOT NULL,
     userid INT NOT NULL,
     answer TEXT NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_accepted TINYINT(1) DEFAULT 0,
     FOREIGN KEY (questionid) REFERENCES questions(questionid) ON DELETE CASCADE,
     FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
@@ -162,7 +162,7 @@ SELECT
     q.title,
     q.userid,
     u.username,
-    q.createdAt,
+    q.created_at,
     q.view_count,
     q.isResolved,
     COUNT(a.answerid) as answer_count,
@@ -171,7 +171,7 @@ FROM questions q
 LEFT JOIN users u ON q.userid = u.userid
 LEFT JOIN answers a ON q.questionid = a.questionid
 LEFT JOIN answer_votes av ON a.answerid = av.answerid
-GROUP BY q.questionid, q.title, q.userid, u.username, q.createdAt, q.view_count, q.isResolved;
+GROUP BY q.questionid, q.title, q.userid, u.username, q.created_at, q.view_count, q.isResolved;
 
 CREATE VIEW user_reputation AS
 SELECT 

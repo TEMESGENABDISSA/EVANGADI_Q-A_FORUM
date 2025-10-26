@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const dbConnection = require("../config/dbConfig");
+const { pool: dbConnection } = require("../config/dbConfig");
 const crypto = require("crypto");
 const { createNotification } = require("./notificationController");
 
@@ -68,6 +68,12 @@ async function postAnswer(req, res) {
       [answerid, userid, questionid, answer, formattedTimestamp]
     );
 
+    // Get answerer's username
+    const [answerer] = await dbConnection.query(
+      "SELECT username FROM users WHERE userid = ?",
+      [userid]
+    );
+
     // Get question owner to send notification
     const [questionOwner] = await dbConnection.query(
       "SELECT userid, title FROM questions WHERE questionid = ?",
@@ -75,12 +81,14 @@ async function postAnswer(req, res) {
     );
 
     if (questionOwner.length > 0 && questionOwner[0].userid !== userid) {
+      const answererUsername = answerer.length > 0 ? answerer[0].username : "Someone";
+      
       // Create notification for question owner
       await createNotification(
         questionOwner[0].userid,
         "answer",
-        "New answer to your question",
-        `Someone has answered your question: "${questionOwner[0].title}"`,
+        "New Answer",
+        `@${answererUsername} has answered your question: "${questionOwner[0].title}"`,
         questionid,
         answerid
       );
