@@ -1,7 +1,7 @@
 # 🎓 Evangadi Forum - Q&A Platform
 
 A full-stack question and answer forum built with React, Node.js, Express, and MySQL.
-# Front:https://evangadi-forum-sable.vercel.app/auth
+# Front:https://evangadi-forum-sable.vercel.app
 # Backend :https://evangadi-backend-orpin.vercel.app
 ---
 
