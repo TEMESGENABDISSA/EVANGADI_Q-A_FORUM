@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaComment, FaTimes, FaPaperPlane, FaRobot } from 'react-icons/fa';
 import { useTheme } from '../../context/ThemeContext';
-import axios from 'axios';
+import { axiosInstance } from '../../utility/axios';
 import styles from './Chatbot.module.css';
 
 // Enhanced markdown parser
@@ -259,15 +259,7 @@ const Chatbot = () => {
 
       // Make the API request with proper headers and timeout
       const response = await Promise.race([
-        axios({
-          method: 'post',
-          url: '/api/chat',
-          data: requestData,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          withCredentials: true,
+        axiosInstance.post('/chat', requestData, {
           timeout: REQUEST_TIMEOUT
         }),
         new Promise((_, reject) => 
