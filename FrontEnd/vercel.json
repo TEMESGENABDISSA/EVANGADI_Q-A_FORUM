@@ -9,17 +9,6 @@
       }
     }
   ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self' https://evangadi-backend-orpin.vercel.app; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://evangadi-backend-orpin.vercel.app; style-src 'self' 'unsafe-inline' 'unsafe-hashes' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://evangadi-backend-orpin.vercel.app; font-src 'self' data: https://fonts.gstatic.com; object-src 'none'; base-uri 'self';"
-        }
-      ]
-    }
-  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
