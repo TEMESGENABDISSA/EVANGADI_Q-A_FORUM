@@ -147,7 +147,7 @@ app.use("/api/v1", asyncHandler(notificationRoutes));
 
 // Chatbot routes
 const chatbotRoutes = require("./routes/chatbotRoute");
-app.use("/api/chat", asyncHandler(chatbotRoutes));
+app.use("/api/v1/chat", asyncHandler(chatbotRoutes));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
