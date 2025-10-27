@@ -10,7 +10,7 @@ async function authMiddleware(req, res, next) {
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json({ msg: "No token provided or invalid format" });
+        .json({ message: "No token provided or invalid format" });
     }
 
     const token = authHeader.split(" ")[1];
@@ -28,7 +28,7 @@ async function authMiddleware(req, res, next) {
     console.error("JWT Error:", error.message);
     return res
       .status(StatusCodes.UNAUTHORIZED)
-      .json({ msg: "Invalid or expired authentication token" });
+      .json({ message: "Invalid or expired authentication token" });
   }
 }
 

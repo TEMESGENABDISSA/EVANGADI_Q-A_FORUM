@@ -33,16 +33,16 @@ function Login({ onSwitch }) {
 
       await Swal.fire({
         title: "Success!",
-        text: response.data.msg,
+        text: response.data.message,
         icon: "success",
         confirmButtonText: "OK",
       });
     } catch (err) {
-      setError(err.response?.data?.msg || "Error logging in.");
+      setError(err.response?.data?.message || "Error logging in.");
       setSuccess(null);
       await Swal.fire({
         title: "Error",
-        text: err.response?.data?.msg || "Login failed",
+        text: err.response?.data?.message || "Login failed",
         icon: "error",
         confirmButtonText: "OK",
       });

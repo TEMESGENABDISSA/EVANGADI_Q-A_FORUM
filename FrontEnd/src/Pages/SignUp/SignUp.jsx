@@ -192,8 +192,7 @@ function Signup({ onSwitch }) {
       const response = await axiosInstance.post("/user/register", {
         // Sending user registration data
         username: formData.username,
-        firstname: formData.firstName,
-        lastname: formData.lastName,
+        full_name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
       });
@@ -222,13 +221,13 @@ function Signup({ onSwitch }) {
           }
         } catch (loginError) {
           console.error("Login error:", loginError);
-          throw new Error(loginError.response?.data?.msg || "An error occurred during login. Please try again.");
+          throw new Error(loginError.response?.data?.message || "An error occurred during login. Please try again.");
         }
       } else {
-        throw new Error(response.data.Msg || "Error submitting the form. Please try again.");
+        throw new Error(response.data.message || "Error submitting the form. Please try again.");
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.Msg || err.message || "An unexpected error occurred. Please try again.";
+      const errorMessage = err.response?.data?.message || err.message || "An unexpected error occurred. Please try again.";
       await Swal.fire({
         title: "Error",
         text: errorMessage,

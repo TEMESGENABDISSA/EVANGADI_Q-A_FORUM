@@ -15,28 +15,6 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    headers: process.env.NODE_ENV === 'production' ? {
-      'Content-Security-Policy': [
-        "default-src 'self';",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' 'strict-dynamic';",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
-        "img-src 'self' data: blob:;",
-        "connect-src 'self' http://localhost:5000 https://*.googleapis.com;",
-        "font-src 'self' data: https://fonts.gstatic.com;",
-        "frame-src 'self';",
-        "object-src 'none'"
-      ].join(' ')
-    } : {
-      'Content-Security-Policy': [
-        "default-src 'self';",
-        "script-src * 'unsafe-inline' 'unsafe-eval';",
-        "style-src * 'unsafe-inline';",
-        "img-src * data: blob:;",
-        "connect-src *;",
-        "font-src * data:;",
-        "frame-src *;"
-      ].join(' ')
-    },
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

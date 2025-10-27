@@ -1,61 +1,8 @@
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
-const fs = require('fs');
-const path = require('path');
 
 dotenv.config();
 
-// Read SSL certificate - prioritize file over environment variable
-let sslConfig = undefined;
-
-// First, try to load from default location (most reliable)
-const defaultCertPath = path.join(__dirname, 'ca-certificate.crt');
-if (fs.existsSync(defaultCertPath)) {
-  try {
-    sslConfig = {
-      ca: fs.readFileSync(defaultCertPath, 'utf8'),
-      rejectUnauthorized: false
-    };
-    console.log('✅ Loaded SSL certificate from file:', defaultCertPath);
-  } catch (err) {
-    console.error('❌ Error reading SSL certificate file:', err.message);
-  }
-}
-
-// Fallback to environment variable if file doesn't exist
-if (!sslConfig && process.env.SSL_CA) {
-  // If SSL_CA is a file path
-  if (!process.env.SSL_CA.includes('BEGIN CERTIFICATE')) {
-    try {
-      const certPath = path.resolve(process.env.SSL_CA);
-      if (fs.existsSync(certPath)) {
-        sslConfig = {
-          ca: fs.readFileSync(certPath, 'utf8'),
-          rejectUnauthorized: false
-        };
-        console.log('✅ Loaded SSL certificate from path:', certPath);
-      }
-    } catch (err) {
-      console.warn('⚠️  SSL certificate file not found:', err.message);
-    }
-  } 
-  // If SSL_CA contains the certificate content directly
-  else {
-    // Handle potential escape sequences in certificate
-    let certContent = process.env.SSL_CA;
-    // Replace literal \n with actual newlines if they exist
-    if (certContent.includes('\\n')) {
-      certContent = certContent.replace(/\\n/g, '\n');
-    }
-    sslConfig = {
-      ca: certContent,
-      rejectUnauthorized: false
-    };
-    console.log('✅ Loaded SSL certificate from environment variable');
-  }
-}
-
-// Database configuration with defaults
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT) || 3306,
@@ -63,25 +10,23 @@ const dbConfig = {
   password: process.env.DB_PASS || '',
   database: process.env.DB_DATABASE || 'evangadi_forum',
   waitForConnections: true,
-  connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10,
+  connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 30000, // 30 seconds for cloud databases
+  connectTimeout: 30000,
   charset: 'utf8mb4_unicode_ci',
-  ssl: sslConfig,
-  // Enable multiple statements if needed (be careful with this in production)
-  multipleStatements: false
+  ssl: process.env.NODE_ENV === 'production' 
+    ? { rejectUnauthorized: false }
+    : undefined
 };
 
-// Create the connection pool with promise support
 const pool = mysql.createPool(dbConfig);
 
-// Test the connection with detailed error handling
 const testConnection = async () => {
   let connection;
   try {
     connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT 1 as test');
-    console.log('✅ Database connection successful');
+    await connection.ping();
+    console.log('✅ Database connected');
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
@@ -131,6 +76,19 @@ const testConnection = async () => {
   }
 };
 
+// Handle cleanup
+const cleanup = async () => {
+  console.log('\nClosing database connections...');
+  try {
+    await pool.end();
+    console.log('✅ Database connections closed');
+    process.exit(0);
+  } catch (err) {
+    console.error('❌ Error closing database connections:', err);
+    process.exit(1);
+  }
+};
+
 // Set character set
 pool.query("SET NAMES utf8mb4").catch(console.error);
 
@@ -143,19 +101,6 @@ testConnection().then(connected => {
     console.log('✅ Database connection is ready');
   }
 });
-
-// Handle process termination
-const cleanup = async () => {
-  console.log('\nClosing database connections...');
-  try {
-    await pool.end();
-    console.log('✅ Database connections closed.');
-    process.exit(0);
-  } catch (err) {
-    console.error('❌ Error closing database connections:', err);
-    process.exit(1);
-  }
-};
 
 // Handle different types of process termination
 process.on('SIGINT', cleanup);

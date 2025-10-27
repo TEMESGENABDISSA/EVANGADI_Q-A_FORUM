@@ -1,8 +1,7 @@
 import axios from "axios";
 
-// Prefer explicit API base URL from env; fallback to localhost:5001
-const apiBaseUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5001/api/v1";
+// Use proxy for development, full URL for production
+const apiBaseUrl = import.meta.env.VITE_API_URL || "/api/v1";
 
 // Create axios instance with default config
 export const axiosInstance = axios.create({

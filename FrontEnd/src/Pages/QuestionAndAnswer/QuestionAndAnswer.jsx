@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../utility/axios.js";
 import Layout from "../../Layout/Layout.jsx";
 import styles from "./answer.module.css";
@@ -25,6 +25,7 @@ function QuestionAndAnswer() {
   const userId = user?.userid;
   const { isDarkMode } = useTheme();
   const { questionId } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [expandedAnswer, setExpandedAnswer] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,6 +52,20 @@ function QuestionAndAnswer() {
   // Post a new answer to the question
   async function handlePostAnswer(e) {
     e.preventDefault();
+    
+    // Check if user is logged in
+    if (!userId) {
+      Swal.fire({
+        title: "Login Required",
+        text: "Please log in to post an answer.",
+        icon: "info",
+        confirmButtonText: "Go to Login",
+      }).then(() => {
+        navigate("/login");
+      });
+      return;
+    }
+    
     const response = await axiosInstance.post("/answer", {
       userid: userId,
       answer: answerInput.current.value,

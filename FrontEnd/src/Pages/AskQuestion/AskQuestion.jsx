@@ -1,4 +1,4 @@
-import  { useContext, useRef, useState } from "react";
+import  { useContext, useRef, useState, useEffect } from "react";
 import classes from "./askQuestion.module.css";
 import { axiosInstance } from "../../utility/axios.js";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,18 +19,22 @@ function AskQuestion() {
   const MIN_TITLE_LENGTH = 10;
   const MIN_DESCRIPTION_LENGTH = 20;
   
-  // Ensure we have a valid user ID or use a guest ID
-  const getUserId = () => {
-    if (user?.userid) return user.userid;
-    // Generate a guest ID if user is not logged in
-    const guestId = localStorage.getItem('guestId') || `guest-${Date.now()}`;
-    if (!localStorage.getItem('guestId')) {
-      localStorage.setItem('guestId', guestId);
-    }
-    return guestId;
-  };
+  // Check if user is logged in
+  const userId = user?.userid;
   
-  const userId = getUserId();
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!userId) {
+      Swal.fire({
+        title: "Login Required",
+        text: "Please log in to ask a question.",
+        icon: "info",
+        confirmButtonText: "Go to Login",
+      }).then(() => {
+        navigate("/login");
+      });
+    }
+  }, [userId, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();

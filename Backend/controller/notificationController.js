@@ -14,7 +14,7 @@ const getNotifications = async (req, res) => {
   try {
     const [notifications] = await dbConnection.query(
       `SELECT 
-        n.id,
+        n.notificationid as id,
         n.type,
         n.title,
         n.message,
@@ -33,10 +33,22 @@ const getNotifications = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({ notifications });
   } catch (err) {
-    console.error("Error fetching notifications:", err);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Something went wrong, please try again later" });
+    console.error("Error fetching notifications:", {
+      message: err.message,
+      sql: err.sql,
+      code: err.code,
+      errno: err.errno,
+      sqlState: err.sqlState,
+      stack: err.stack
+    });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Error fetching notifications",
+      error: process.env.NODE_ENV === 'development' ? {
+        message: err.message,
+        code: err.code,
+        sql: err.sql
+      } : {}
+    });
   }
 };
 

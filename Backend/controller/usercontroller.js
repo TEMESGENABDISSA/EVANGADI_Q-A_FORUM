@@ -194,7 +194,7 @@ async function forgotPassword(req, res) {
   if (!email) {
     return res.status(StatusCodes.BAD_REQUEST).json({ 
       success: false,
-      msg: "Please provide an email address." 
+      message: "Please provide an email address." 
     });
   }
 
@@ -209,7 +209,7 @@ async function forgotPassword(req, res) {
       // For security reasons, don't reveal if the email exists or not
       return res.status(StatusCodes.OK).json({ 
         success: true,
-        msg: "If an account with that email exists, a password reset link has been sent." 
+        message: "If an account with that email exists, a password reset link has been sent." 
       });
     }
 
@@ -260,13 +260,13 @@ async function forgotPassword(req, res) {
     // Always return the same response for security reasons
     res.status(StatusCodes.OK).json({ 
       success: true,
-      msg: "If an account with that email exists, a password reset link has been sent." 
+      message: "If an account with that email exists, a password reset link has been sent." 
     });
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
       success: false,
-      msg: "An error occurred while processing your request." 
+      message: "An error occurred while processing your request." 
     });
   }
 }
@@ -278,7 +278,7 @@ async function resetPassword(req, res) {
   if (!password || password.length < 8) {
     return res.status(StatusCodes.BAD_REQUEST).json({ 
       success: false,
-      msg: "Password is required and must be at least 8 characters." 
+      message: "Password is required and must be at least 8 characters." 
     });
   }
 
@@ -294,19 +294,19 @@ async function resetPassword(req, res) {
     
     res.status(StatusCodes.OK).json({ 
       success: true,
-      msg: "Password has been reset successfully." 
+      message: "Password has been reset successfully." 
     });
   } catch (err) {
     console.error('Password reset error:', err);
     if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
       return res.status(StatusCodes.BAD_REQUEST).json({ 
         success: false,
-        msg: "Invalid or expired reset link." 
+        message: "Invalid or expired reset link." 
       });
     }
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
       success: false,
-      msg: "An error occurred while resetting the password." 
+      message: "An error occurred while resetting the password." 
     });
   }
 }

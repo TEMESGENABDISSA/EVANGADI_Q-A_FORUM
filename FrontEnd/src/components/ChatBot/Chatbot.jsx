@@ -20,7 +20,7 @@ const parseMarkdown = (text) => {
     return `<div class="code-block-wrapper">
       <div class="code-header">
         <span class="code-language">${language}</span>
-        <button class="copy-code-btn" data-code-id="${codeBlockId}" onclick="copyCode('${codeBlockId}', this)" title="Copy code">
+        <button class="copy-code-btn" data-code-id="${codeBlockId}" onclick="window.copyCode('${codeBlockId}', this)" title="Copy code">
           📋 Copy
         </button>
       </div>
@@ -72,8 +72,8 @@ const parseMarkdown = (text) => {
   return html;
 };
 
-// Copy code to clipboard function
-window.copyCode = (codeId, button) => {
+// Copy code to clipboard function - moved inside component
+const copyCode = (codeId, button) => {
   const codeElement = document.getElementById(`code-${codeId}`);
   if (codeElement) {
     const code = codeElement.textContent;
@@ -120,6 +120,14 @@ const Chatbot = () => {
       setIsFirstVisit(true);
       localStorage.setItem('hasVisited', 'true');
     }
+  }, []);
+
+  // Add copyCode function to window object
+  useEffect(() => {
+    window.copyCode = copyCode;
+    return () => {
+      delete window.copyCode;
+    };
   }, []);
 
   // Auto-open for first-time visitors after 3 seconds
@@ -253,7 +261,7 @@ const Chatbot = () => {
       const response = await Promise.race([
         axios({
           method: 'post',
-          url: process.env.REACT_APP_API_URL || '/api/chat',
+          url: '/api/chat',
           data: requestData,
           headers: {
             'Content-Type': 'application/json',

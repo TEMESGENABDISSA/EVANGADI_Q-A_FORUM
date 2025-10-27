@@ -53,66 +53,64 @@ const allowedOrigins = [
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
-  // Allow requests with no origin (like mobile apps or curl requests)
-  if (process.env.NODE_ENV === 'development' || !origin || allowedOrigins.includes(origin)) {
+  // In development, allow all origins for easier development
+  if (process.env.NODE_ENV === 'development') {
     res.header('Access-Control-Allow-Origin', origin || '*');
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    return next();
   }
   
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+  // In production, only allow specific origins
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
   }
   
   next();
 });
 
-// Security headers middleware
+// Security headers middleware - Simplified for development
 app.use((req, res, next) => {
-  // Set Content Security Policy
   if (process.env.NODE_ENV === 'development') {
-    // Development CSP (more permissive)
-    const nonce = require('crypto').randomBytes(16).toString('base64');
-    const csp = [
-      "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;",
-      "connect-src 'self' http://localhost:* https://*.aivencloud.com wss: http: https: chrome-extension:;",
-      "img-src 'self' data: blob: https:;",
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' 'nonce-${nonce}' 'strict-dynamic' https: http: chrome-extension: 'sha256-kPx0AsF0oz2kKiZ875xSvv693TBHkQ/0SkMJZnnNpnQ=';`,
-      "script-src-attr 'unsafe-inline' 'self';",
-      "style-src 'self' 'unsafe-inline' https: chrome-extension: data:;",
-      "frame-src 'self' https:;",
-      "child-src 'self' blob:;",
-      "worker-src 'self' blob:;",
-      "font-src 'self' https: data:;",
-      "connect-src 'self' http://localhost:* https: http: ws: wss: chrome-extension:;"
-    ].join(' ');
-    
-    res.setHeader('Content-Security-Policy', csp);
+    // Development - More permissive settings
+    res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: http: https: ws: wss:;");
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
   } else {
-    // Production CSP (more restrictive but still allowing necessary functionality)
+    // Production - More secure settings
     const nonce = require('crypto').randomBytes(16).toString('base64');
     const csp = [
       "default-src 'self';",
-      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https: http: chrome-extension: 'sha256-kPx0AsF0oz2kKiZ875xSvv693TBHkQ/0SkMJZnnNpnQ=';`,
-      `script-src-elem 'self' 'unsafe-inline' https: http:;`,
-      "script-src-attr 'unsafe-inline' 'self';",
-      "style-src 'self' 'unsafe-inline' https: chrome-extension: data:;",
+      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https: http:;`,
+      "style-src 'self' 'unsafe-inline' https:;",
       "img-src 'self' data: blob: https:;",
       "font-src 'self' https: data:;",
-      "connect-src 'self' https: http://localhost:* ws: wss: chrome-extension:;",
+      "connect-src 'self' https: wss:;",
       "frame-src 'self' https:;"
     ].join(' ');
     
     res.setHeader('Content-Security-Policy', csp);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   }
-  
-  // Other security headers
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
   next();
 });
@@ -124,41 +122,42 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // DB connection
 const dbConnection = require("./config/dbConfig");
 
+// Error handling wrapper for async route handlers
+const asyncHandler = fn => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
 // Import routes
 const userRoutes = require("./routes/userRoutes");
 const questionRoutes = require("./routes/questionRoute");
 const answerRoutes = require("./routes/answerRoute");
 
-// Use routes
-app.use("/api/v1/user", userRoutes);
-app.use("/api/v1", questionRoutes);
-app.use("/api/v1", answerRoutes);
-
-// Process error handling
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
-// Chat routes (legacy)
-// const chatRoutes = require("./routes/chatRoute");
-// app.use("/api/v1", chatRoutes);
+// Use routes with error handling
+app.use("/api/v1/user", asyncHandler(userRoutes));
+app.use("/api/v1", asyncHandler(questionRoutes));
+app.use("/api/v1", asyncHandler(answerRoutes));
 
 // AI Assistant routes (testing)
 const testAssistantRoutes = require("./routes/assistantRoute.new");
-app.use("/api/v1/assistant", testAssistantRoutes);
+app.use("/api/v1/assistant", asyncHandler(testAssistantRoutes));
 
 // Notification routes
 const notificationRoutes = require("./routes/notificationRoute");
-app.use("/api/v1", notificationRoutes);
+app.use("/api/v1", asyncHandler(notificationRoutes));
 
 // Chatbot routes
 const chatbotRoutes = require("./routes/chatbotRoute");
-app.use("/api/chat", chatbotRoutes);
+app.use("/api/chat", asyncHandler(chatbotRoutes));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ 
+    success: false, 
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
 
 // --------------------
 // TEST ROOT
