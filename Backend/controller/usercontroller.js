@@ -225,7 +225,9 @@ async function forgotPassword(req, res) {
     // In a real app, you might want to store this token in the database
     // with an expiration time and check it when resetting the password
     
-    const resetLink = `http://localhost:5173/reset-password/${token}`;
+    // Use environment variable for frontend URL, fallback to localhost for development
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetLink = `${frontendUrl}/reset-password/${token}`;
     
     // Only try to send email if email configuration is set up
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
@@ -260,13 +262,13 @@ async function forgotPassword(req, res) {
     // Always return the same response for security reasons
     res.status(StatusCodes.OK).json({ 
       success: true,
-      message: "If an account with that email exists, a password reset link has been sent." 
+      msg: "If an account with that email exists, a password reset link has been sent." 
     });
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
       success: false,
-      message: "An error occurred while processing your request." 
+      msg: "An error occurred while processing your request." 
     });
   }
 }
@@ -294,19 +296,19 @@ async function resetPassword(req, res) {
     
     res.status(StatusCodes.OK).json({ 
       success: true,
-      message: "Password has been reset successfully." 
+      msg: "Password has been reset successfully." 
     });
   } catch (err) {
     console.error('Password reset error:', err);
     if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
       return res.status(StatusCodes.BAD_REQUEST).json({ 
         success: false,
-        message: "Invalid or expired reset link." 
+        msg: "Invalid or expired reset link." 
       });
     }
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
       success: false,
-      message: "An error occurred while resetting the password." 
+      msg: "An error occurred while resetting the password." 
     });
   }
 }
