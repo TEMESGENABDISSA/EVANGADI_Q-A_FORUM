@@ -14,19 +14,17 @@ const getNotifications = async (req, res) => {
   try {
     const [notifications] = await dbConnection.query(
       `SELECT 
-        n.notificationid as id,
+        n.notification_id as id,
         n.type,
-        n.title,
         n.message,
-        n.related_question_id,
-        n.related_answer_id,
+        n.related_id,
         n.is_read,
-        n.created_at,
+        n.createdAt as created_at,
         q.title as question_title
       FROM notifications n
-      LEFT JOIN questions q ON n.related_question_id = q.questionid
+      LEFT JOIN questions q ON n.related_id = q.questionid
       WHERE n.userid = ?
-      ORDER BY n.created_at DESC
+      ORDER BY n.createdAt DESC
       LIMIT 50`,
       [userid]
     );
@@ -65,7 +63,7 @@ const markAsRead = async (req, res) => {
 
   try {
     await dbConnection.query(
-      "UPDATE notifications SET is_read = 1 WHERE id = ? AND userid = ?",
+      "UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND userid = ?",
       [notificationId, userid]
     );
 
@@ -120,7 +118,7 @@ const deleteNotification = async (req, res) => {
 
   try {
     await dbConnection.query(
-      "DELETE FROM notifications WHERE id = ? AND userid = ?",
+      "DELETE FROM notifications WHERE notification_id = ? AND userid = ?",
       [notificationId, userid]
     );
 
@@ -164,15 +162,13 @@ const getUnreadCount = async (req, res) => {
 const createNotification = async (
   userid,
   type,
-  title,
   message,
-  questionId = null,
-  answerId = null
+  relatedId = null
 ) => {
   try {
     await dbConnection.query(
-      "INSERT INTO notifications (userid, type, title, message, related_question_id, related_answer_id) VALUES (?, ?, ?, ?, ?, ?)",
-      [userid, type, title, message, questionId, answerId]
+      "INSERT INTO notifications (userid, type, message, related_id) VALUES (?, ?, ?, ?)",
+      [userid, type, message, relatedId]
     );
   } catch (err) {
     console.error("Error creating notification:", err);

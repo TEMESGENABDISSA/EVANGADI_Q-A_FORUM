@@ -87,10 +87,8 @@ async function postAnswer(req, res) {
       await createNotification(
         questionOwner[0].userid,
         "answer",
-        "New Answer",
         `@${answererUsername} has answered your question: "${questionOwner[0].title}"`,
-        questionid,
-        answerid
+        questionid
       );
     }
 
