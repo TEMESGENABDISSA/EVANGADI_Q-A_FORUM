@@ -1,6 +1,6 @@
 const config = {
   // API Base URL
-  apiBaseUrl: 'http://localhost:5001/api/v1',
+  apiBaseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1',
   
   // API Endpoints
   endpoints: {
