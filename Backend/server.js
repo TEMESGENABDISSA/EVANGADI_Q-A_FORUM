@@ -166,6 +166,44 @@ app.get("/", (req, res) => {
   res.status(200).send("this is  Evangadi forum");
 });
 
+// --------------------
+// TEST EMAIL ENDPOINT
+// --------------------
+app.get("/test-email", async (req, res) => {
+  try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      return res.status(400).json({ 
+        error: "Email configuration not set",
+        EMAIL_USER: process.env.EMAIL_USER ? 'Set' : 'Not set',
+        EMAIL_PASS: process.env.EMAIL_PASS ? 'Set' : 'Not set'
+      });
+    }
+
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { 
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS 
+      },
+    });
+
+    // Verify transporter
+    await transporter.verify();
+    
+    res.json({ 
+      success: true, 
+      message: "Email configuration is working",
+      email_user: process.env.EMAIL_USER
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: "Email configuration failed", 
+      details: error.message 
+    });
+  }
+});
+
 // Start server with database connection check
 const start = async () => {
   try {

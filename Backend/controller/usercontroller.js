@@ -232,6 +232,8 @@ async function forgotPassword(req, res) {
     // Only try to send email if email configuration is set up
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       try {
+        console.log('Attempting to send password reset email to:', email);
+        
         const transporter = nodemailer.createTransport({
           service: "gmail",
           auth: { 
@@ -240,23 +242,41 @@ async function forgotPassword(req, res) {
           },
         });
 
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
+        // Verify transporter configuration
+        await transporter.verify();
+        console.log('Email transporter verified successfully');
+
+        const mailOptions = {
+          from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
           to: email,
           subject: "Password Reset - Evangadi Forum",
           html: `
-            <p>You requested a password reset for your Evangadi Forum account.</p>
-            <p>Click the link below to reset your password (valid for 1 hour):</p>
-            <p><a href="${resetLink}">${resetLink}</a></p>
-            <p>If you didn't request this, please ignore this email.</p>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">Password Reset Request</h2>
+              <p>You requested a password reset for your Evangadi Forum account.</p>
+              <p>Click the button below to reset your password (valid for 1 hour):</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetLink}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
+              </div>
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #666;">${resetLink}</p>
+              <p style="color: #999; font-size: 14px;">If you didn't request this password reset, please ignore this email.</p>
+            </div>
           `,
-        });
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Password reset email sent successfully:', info.messageId);
+        
       } catch (emailError) {
-        console.error('Error sending email:', emailError);
-        // Continue with the response even if email fails
+        console.error('Error sending password reset email:', emailError);
+        // Log the error but don't reveal it to the user for security
+        console.log('Email sending failed, but continuing with response for security');
       }
     } else {
       console.log('Email configuration not set. Reset link:', resetLink);
+      console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'Set' : 'Not set');
+      console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set' : 'Not set');
     }
 
     // Always return the same response for security reasons
