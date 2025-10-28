@@ -83,229 +83,77 @@ FORUM NAVIGATION
 What would you like to do?`;
   }
 
-  // How to Ask a Question
-  if (/(how\s*to|want to|need to|help me|can i|how do i|create|make|post|ask)\s+(a |my |new )?(question|post|query)/i.test(userMsg)) {
-    return `
-# HOW TO ASK A QUESTION ON EVANGADI FORUM
-
-1. **Click "Ask Question"**
-   - Find the button in the top navigation
-   - Or use the "Ask Question" button on the home page
-
-2. **Enter Your Question**
-   - **Title**: Be specific about your problem
-   - **Details**: Include all relevant information
-   - **Code**: Use code blocks for technical questions
-   - **Tags**: Add relevant tags
-
-3. **Preview Your Question**
-   - Check the preview panel
-   - Verify formatting is correct
-   - Ensure code is properly formatted
-   - Check for typos or missing information
-
-4. **Edit if Needed**
-   - Click "Edit" to make changes
-   - Fix any formatting issues
-   - Add any missing details
-   - Preview again after changes
-
-5. **Submit Your Question**
-   - Click "Post Your Question"
-   - Wait for the page to refresh
-   - Your question is now live!
-
-# TIPS FOR BETTER RESPONSES:
-- Be clear and specific
-- Include error messages
-- Show what you've tried
-- Format code properly
-- Keep it concise but complete
-
-Need help with something specific about your question? Just ask!`;
-  }
-
-  // How to Post an Answer
-  if (/(how\s*to|want to|need to|help me|can i|how do i|post|write|answer|respond to).*\b(answer|reply|respond|solution)/i.test(userMsg)) {
-    return `
-# HOW TO POST AN ANSWER ON EVANGADI FORUM
-
-1. **Find a Question**
-   - Browse the questions list
-   - Look for unanswered questions
-   - Or search for specific topics
-
-2. **Write Your Answer**
-   - Click on the "Answer" button below the question
-   - Use the editor to format your response
-   - Include code snippets in code blocks
-   - Add relevant examples
-
-3. **Format Your Answer**
-   - Use markdown for formatting
-   - Add headings for structure
-   - Include bullet points for clarity
-   - Highlight important information
-
-4. **Before Submitting**
-   - Review for accuracy
-   - Check code formatting
-   - Ensure your answer is complete
-   - Be respectful and professional
-
-5. **Post Your Answer**
-   - Click "Post Your Answer"
-   - Wait for the page to refresh
-   - Your answer is now visible to everyone!
-
-# TIPS FOR GREAT ANSWERS:
-- Be clear and concise
-- Provide working solutions
-- Explain your reasoning
-- Include relevant examples
-- Be kind and constructive`;
-  }
-
-  // How to Register an Account
-  if (/(how\s*to|want to|need to|help me|can i|how do i|create|make|sign up).*\b(account|register|sign up|signup)/i.test(userMsg)) {
-    return `
-ACCOUNT REGISTRATION
-
-1. Click "Sign Up"
-   - Top-right corner
-   - Or main page button
-
-2. Enter your details
-   - Username
-   - Email
-   - Password
-
-3. Verify email
-   - Check your inbox
-   - Click verification link
-
-4. Complete profile
-   - Add a photo
-   - Set preferences
-   - Explore the forum`;
-  }
-
-  // Password Reset Help
-  if (/(forgot|forget|lost|reset|change|recover).*\b(password|pass|pwd)/i.test(userMsg) || 
-      /(password|pass|pwd).*\b(forgot|forget|lost|reset|change|recover)/i.test(userMsg) ||
-      /(how\s*to|help me|can i|how do i).*\b(reset|change|recover).*\b(password|pass)/i.test(userMsg)) {
-    return `
-# 🔐 PASSWORD RESET GUIDE
-
-## STEP 1: REQUEST RESET LINK
-1. **Go to Login Page**
-   - Click "Login" in the top-right corner
-   - Or visit the login page directly
-
-2. **Click "Forgot Password?"**
-   - Look for the link below the password field
-   - Click on "Forgot password?" text
-
-3. **Enter Your Email**
-   - Type the email address associated with your account
-   - Make sure it's the same email you used to register
-
-4. **Click "Send Reset Link"**
-   - Wait for the confirmation message
-   - Check your email inbox (including spam folder)
-
-## STEP 2: CHECK YOUR EMAIL
-1. **Look for Email**
-   - Subject: "Password Reset - Evangadi Forum"
-   - From: Evangadi Forum
-   - Check spam/junk folder if not in inbox
-
-2. **Click Reset Link**
-   - Click the blue "Reset Password" button
-   - Or copy the link and paste in browser
-
-## STEP 3: CREATE NEW PASSWORD
-1. **Enter New Password**
-   - Must be at least 8 characters
-   - Use a strong, unique password
-
-2. **Confirm Password**
-   - Re-enter the same password
-   - Make sure both passwords match
-
-3. **Click "Reset Password"**
-   - Wait for success message
-   - You'll be redirected to login page
-
-## STEP 4: LOGIN WITH NEW PASSWORD
-1. **Go to Login Page**
-2. **Enter Credentials**
-   - Username or email
-   - Your new password
-3. **Click "Login"**
-
-## 🚨 TROUBLESHOOTING
-**No Email Received?**
-- Check spam/junk folder
-- Wait 5-10 minutes
-- Try requesting again
-- Contact support if still no email
-
-**Link Expired?**
-- Reset links expire after 1 hour
-- Request a new reset link
-- Use the same email address
-
-**Still Having Issues?**
-- Make sure you're using the correct email
-- Check your internet connection
-- Try a different browser
-- Contact support for help
-
-Need more help? Just ask!`;
-  }
-
-  // Login Help
-  if (/(how\s*to|want to|need to|help me|can i|how do i|login|sign in|log in)/i.test(userMsg) && 
+  // Login Help — narrower and avoids unrelated guidance
+  if (/(how\s*to|want to|need to|help me|can i|how do i|login|sign in|log in)/i.test(userMsg) &&
       !/(forgot|forget|lost|reset|change|recover)/i.test(userMsg)) {
     return `
 # 🔑 LOGIN HELP
 
-## HOW TO LOGIN
-1. **Click "Login"**
-   - Top-right corner of the page
-   - Or main page login button
+1. **Click \"Login\"** (top-right corner/main page)
+2. **Enter your credentials** (username/email & password)
+3. **Click \"Login\"** to access your account
 
-2. **Enter Your Credentials**
-   - **Username or Email**: Use either one
-   - **Password**: Your account password
+**Trouble logging in?**
+- If you forgot your password, ask about \"forgot password\" for help.
+- Check email/username spelling and Caps Lock.
+- Still stuck? Contact support or register a new account.`;
+  }
 
-3. **Click "Login"**
-   - Wait for authentication
-   - You'll be redirected to the home page
+  // Password Reset Help — focused on password alone
+  if (/(forgot|forget|lost|reset|change|recover).*(password|pass|pwd)/i.test(userMsg) || 
+      /(password|pass|pwd).*(forgot|forget|lost|reset|change|recover)/i.test(userMsg) ||
+      /(how\s*to|help me|can i|how do i).*(reset|change|recover).*(password|pass)/i.test(userMsg)) {
+    return `
+# 🔐 PASSWORD RESET GUIDE
 
-## LOGIN TROUBLESHOOTING
-**Can't Remember Password?**
-- Click "Forgot password?" below the password field
-- Follow the password reset process
+Go to the login page and click \"Forgot password?\" below the password field. Enter your account email, check your inbox, and follow the reset link.\n
+Trouble? Check your spam folder, wait a few minutes, or try again. For more help, contact support.`;
+  }
 
-**Wrong Credentials?**
-- Check your username/email spelling
-- Make sure Caps Lock is off
-- Try typing password in a text editor first
+  // Signup/Registration Help — focused only on how to register
+  if (/(how\s*to|want to|need to|help me|can i|how do i|create|make|sign up).*(account|register|sign up|signup)/i.test(userMsg)) {
+    return `
+# ACCOUNT REGISTRATION
 
-**Account Not Found?**
-- Make sure you're using the correct email
-- Check if you need to register first
-- Try different variations of your username
+Click \"Sign Up\" in the top right or main page. Fill out your details (username, email, password), verify your email if required, and you're in! Already have an account? Try logging in.`;
+  }
 
-**Still Having Issues?**
-- Clear browser cache and cookies
-- Try a different browser
-- Check your internet connection
-- Contact support for help
+  // Posting a Question — only question help
+  if (/(how\s*to|want to|need to|help me|can i|how do i|create|make|post|ask)\s+(a |my |new )?(question|post|query)/i.test(userMsg)) {
+    return `
+# HOW TO ASK A QUESTION
 
-Need password reset help? Just ask about "forgot password"!`;
+Click \"Ask Question\", enter a descriptive title and details, review your question, then submit. For better answers, explain your problem with details and code if relevant.`;
+  }
+
+  // Posting an Answer — only answer help
+  if (/(how\s*to|want to|need to|help me|can i|how do i|post|write|answer|respond to).*\b(answer|reply|respond|solution)/i.test(userMsg)) {
+    return `
+# HOW TO POST AN ANSWER
+
+Find a question, click the \"Answer\" button, write your answer clearly (with code/examples as needed), and submit. To improve your answer, be specific and constructive.`;
+  }
+
+  // Editing/Deleting a Post — only that action
+  if (/(how\s*to|can i|help me|want to|need to|steps to|instruction).*(edit|update|delete|remove).*(my |a |their |this |that )?(post|question|answer|reply)/i.test(userMsg)) {
+    return `
+# EDIT OR DELETE YOUR POST
+
+To edit: Go to your post and click the ✏️ Edit icon. To delete: Click the 🗑️ Delete icon and confirm. You must be the post’s author and logged in.`;
+  }
+
+  // Comment/React — focus only on that
+  if (/(how\s*to|can i|help me|want to|need to|steps to|instruction).*(comment|reply|react|like|upvote|downvote|respond).*(post|question|answer|reply)?/i.test(userMsg)) {
+    return `
+# COMMENT OR REACT
+
+To comment: Click the Comment button under a post and submit your comment. To react: Click 👍 or ❤️ (if available) on a post or answer. You may need to log in first.`;
+  }
+  
+  // Platform Purpose/Q&A purpose — only that info
+  if (/(what is|explain|about|purpose|meaning|define).*(evangadi|forum|platform)/i.test(userMsg)) {
+    return `
+Evangadi Forum is an open Q&A community for asking and answering questions, sharing knowledge, and helping others learn and succeed.`;
   }
 
   // How to Search for Questions
