@@ -26,6 +26,8 @@ FORUM NAVIGATION
 
 ACCOUNT HELP
 • Registration
+• Login issues
+• Password reset
 • Profile setup
 • Settings
 
@@ -70,6 +72,7 @@ QUESTIONS & ANSWERS
 ACCOUNT HELP
 • Registration
 • Login issues
+• Password reset
 • Profile settings
 
 FORUM NAVIGATION
@@ -187,6 +190,124 @@ ACCOUNT REGISTRATION
    - Explore the forum`;
   }
 
+  // Password Reset Help
+  if (/(forgot|forget|lost|reset|change|recover).*\b(password|pass|pwd)/i.test(userMsg) || 
+      /(password|pass|pwd).*\b(forgot|forget|lost|reset|change|recover)/i.test(userMsg) ||
+      /(how\s*to|help me|can i|how do i).*\b(reset|change|recover).*\b(password|pass)/i.test(userMsg)) {
+    return `
+# 🔐 PASSWORD RESET GUIDE
+
+## STEP 1: REQUEST RESET LINK
+1. **Go to Login Page**
+   - Click "Login" in the top-right corner
+   - Or visit the login page directly
+
+2. **Click "Forgot Password?"**
+   - Look for the link below the password field
+   - Click on "Forgot password?" text
+
+3. **Enter Your Email**
+   - Type the email address associated with your account
+   - Make sure it's the same email you used to register
+
+4. **Click "Send Reset Link"**
+   - Wait for the confirmation message
+   - Check your email inbox (including spam folder)
+
+## STEP 2: CHECK YOUR EMAIL
+1. **Look for Email**
+   - Subject: "Password Reset - Evangadi Forum"
+   - From: Evangadi Forum
+   - Check spam/junk folder if not in inbox
+
+2. **Click Reset Link**
+   - Click the blue "Reset Password" button
+   - Or copy the link and paste in browser
+
+## STEP 3: CREATE NEW PASSWORD
+1. **Enter New Password**
+   - Must be at least 8 characters
+   - Use a strong, unique password
+
+2. **Confirm Password**
+   - Re-enter the same password
+   - Make sure both passwords match
+
+3. **Click "Reset Password"**
+   - Wait for success message
+   - You'll be redirected to login page
+
+## STEP 4: LOGIN WITH NEW PASSWORD
+1. **Go to Login Page**
+2. **Enter Credentials**
+   - Username or email
+   - Your new password
+3. **Click "Login"**
+
+## 🚨 TROUBLESHOOTING
+**No Email Received?**
+- Check spam/junk folder
+- Wait 5-10 minutes
+- Try requesting again
+- Contact support if still no email
+
+**Link Expired?**
+- Reset links expire after 1 hour
+- Request a new reset link
+- Use the same email address
+
+**Still Having Issues?**
+- Make sure you're using the correct email
+- Check your internet connection
+- Try a different browser
+- Contact support for help
+
+Need more help? Just ask!`;
+  }
+
+  // Login Help
+  if (/(how\s*to|want to|need to|help me|can i|how do i|login|sign in|log in)/i.test(userMsg) && 
+      !/(forgot|forget|lost|reset|change|recover)/i.test(userMsg)) {
+    return `
+# 🔑 LOGIN HELP
+
+## HOW TO LOGIN
+1. **Click "Login"**
+   - Top-right corner of the page
+   - Or main page login button
+
+2. **Enter Your Credentials**
+   - **Username or Email**: Use either one
+   - **Password**: Your account password
+
+3. **Click "Login"**
+   - Wait for authentication
+   - You'll be redirected to the home page
+
+## LOGIN TROUBLESHOOTING
+**Can't Remember Password?**
+- Click "Forgot password?" below the password field
+- Follow the password reset process
+
+**Wrong Credentials?**
+- Check your username/email spelling
+- Make sure Caps Lock is off
+- Try typing password in a text editor first
+
+**Account Not Found?**
+- Make sure you're using the correct email
+- Check if you need to register first
+- Try different variations of your username
+
+**Still Having Issues?**
+- Clear browser cache and cookies
+- Try a different browser
+- Check your internet connection
+- Contact support for help
+
+Need password reset help? Just ask about "forgot password"!`;
+  }
+
   // How to Search for Questions
   if (/(how\s*to|want to|need to|help me|can i|how do i|find|look for|search).*\b(search|find|look up)/i.test(userMsg)) {
     return `
@@ -232,7 +353,7 @@ I'm here to help with Evangadi Forum! Here are a few things I can assist with:
 
 • Posting a question – Learn how to ask effectively  
 • Answering questions – Help others by sharing knowledge  
-• Account help – Registration, login, and settings  
+• Account help – Registration, login, password reset, and settings  
 • Forum navigation – Find your way around easily  
 • Community guidelines – Learn the rules and etiquette  
 
